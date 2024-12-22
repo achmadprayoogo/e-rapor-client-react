@@ -4,6 +4,7 @@ import Toolbar from "../Toolbar/Toolbar";
 import { getData } from "../../fetcher";
 import { parseISO, isValid } from "date-fns";
 import Loading from "../Loading/Loading";
+import ErrorServer from "../ErrorServer/ErrorServer";
 
 const ROW_HEADERS = [
   "No",
@@ -59,11 +60,7 @@ function TabelBiodata() {
   }
 
   if (!students) {
-    return (
-      <div className="text-red-600 text-2xl h-full w-full flex items-center justify-center">
-        <p>Failed loading data</p>
-      </div>
-    );
+    return <ErrorServer />;
   }
 
   const data = students.data.map((student) => {

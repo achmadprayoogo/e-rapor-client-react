@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Input from "./Input";
 import Loading from "../Loading/Loading";
+
 import { getData } from "../../fetcher";
 
 export default function StudentInput() {
