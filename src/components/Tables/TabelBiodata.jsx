@@ -3,6 +3,7 @@ import TablePagination from "../TablePagination";
 import Toolbar from "../Toolbar/Toolbar";
 import { getData } from "../../fetcher";
 import { parseISO, isValid } from "date-fns";
+import Loading from "../Loading/Loading";
 
 const ROW_HEADERS = [
   "No",
@@ -54,7 +55,7 @@ function TabelBiodata() {
   }, [students]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (!students) {

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Input from "./Input";
+import Loading from "../Loading/Loading";
 import { getData } from "../../fetcher";
 
 export default function StudentInput() {
@@ -17,19 +18,37 @@ export default function StudentInput() {
   const [academicYear, setAcademicYear] = useState([]);
   const [grade, setGrade] = useState([]);
   const [classRoom, setClassRoom] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
-      const resultData = await getData(
-        "http://localhost:3000/api/admin/students?page[number]=1&page[size]=20"
-      );
+      const resultData = () => {
+        const academicYearResult = getData(
+          "http://localhost:3000/api/admin/academicyears"
+        );
+        const gradeResult = getData("http://localhost:3000/api/admin/grade");
+        const classRoomResult = getData(
+          "http://localhost:3000/api/admin/class"
+        );
+
+        return Promise.all([academicYearResult, gradeResult, classRoomResult]);
+      };
       if (resultData) {
-        setStudents(resultData);
+        setAcademicYear(resultData);
       }
       setLoading(false);
     }
+
     fetchData();
   }, []);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  console.log(academicYear);
+  console.log(grade);
+  console.log(classRoom);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
