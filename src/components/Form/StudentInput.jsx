@@ -1,69 +1,129 @@
 import { useState, useEffect } from "react";
 import Input from "./Input";
 import Loading from "../Loading/Loading";
-
-import { getData } from "../../fetcher";
+import ErrorServer from "../ErrorServer/ErrorServer";
+import { getData, postData } from "../../fetcher";
 
 export default function StudentInput() {
-  const [formData, setFormData] = useState({
-    nis: "",
-    fullname: "",
-    birthdate: "",
-    city_of_birth: "",
-    father_name: "",
-    mother_name: "",
-    guardian_name: "",
-    status: "",
-    address: "",
-  });
-  const [academicYear, setAcademicYear] = useState([]);
-  const [grade, setGrade] = useState([]);
-  const [classRoom, setClassRoom] = useState([]);
+  const [formData, setFormData] = useState({});
+  const [academicYear, setAcademicYear] = useState([
+    { label: "Belum ada data", value: "" },
+  ]);
+  const [grade, setGrade] = useState([{ label: "Belum ada data", value: "" }]);
+  const [classRoom, setClassRoom] = useState([
+    { label: "Belum ada data", value: "" },
+  ]);
+  const [homeroomTeacher, setHomeroomTeacher] = useState("Belum ada data");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
-      const resultData = () => {
-        const academicYearResult = getData(
-          "http://localhost:3000/api/admin/academicyears"
-        );
-        const gradeResult = getData("http://localhost:3000/api/admin/grade");
-        const classRoomResult = getData(
-          "http://localhost:3000/api/admin/class"
-        );
+      const resultData = await getData(
+        "http://localhost:3000/api/admin/academicyear"
+      );
 
-        return Promise.all([academicYearResult, gradeResult, classRoomResult]);
-      };
       if (resultData) {
-        setAcademicYear(resultData);
+        const academicYearData = resultData.data.map((year) => ({
+          label: year.attributes.academic_year,
+          value: year.id,
+        }));
+
+        setAcademicYear([
+          { label: "Pilih Tahun Ajaran", value: "" },
+          ...academicYearData,
+        ]);
       }
       setLoading(false);
     }
 
     fetchData();
-  }, []);
+  }, [academicYear]);
+
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+
+    if (name === "academic_year") {
+      const selectedYearId = value;
+      const result = await getData(
+        `http://localhost:3000/api/admin/gradeclass/${selectedYearId}`
+      );
+
+      if (result) {
+        const grades = result.data.map((grade) => ({
+          label: grade.attributes.grade_class,
+          value: grade.id,
+        }));
+        setGrade([{ label: "Pilih Tingkat", value: "" }, ...grades]);
+      } else {
+        console.error("Failed to fetch grade data");
+      }
+
+      return;
+    } else if (name === "grade_id") {
+      const selectedGradeId = value;
+      const result = await getData(
+        `http://localhost:3000/api/admin/classname/${selectedGradeId}`
+      );
+
+      if (result) {
+        const classes = result.data.map((classRoom) => ({
+          label: classRoom.attributes.class_name,
+          value: classRoom.id,
+        }));
+        setClassRoom([{ label: "Pilih Kelas", value: "" }, ...classes]);
+      } else {
+        console.error("Failed to fetch class data");
+      }
+
+      return;
+    } else if (name === "class_name_id") {
+      const selectedClassNameId = value;
+      const result = await getData(
+        `http://localhost:3000/api/admin/classname/find/${selectedClassNameId}`
+      );
+
+      console.log(result);
+
+      if (result) {
+        setHomeroomTeacher(`Ust. ${result.data.attributes.homeroom_teacher}`);
+      } else {
+        console.error("Failed to find homeroom teacher data");
+      }
+    }
+
+    // Update formData for other fields
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+    const result = await postData(
+      "http://localhost:3000/api/admin/students/input",
+      formData
+    );
+
+    setLoading(false);
+
+    if (result.error) {
+      setError(result.error);
+    } else {
+      alert("Data santri berhasil diinput");
+    }
+  };
 
   if (loading) {
     return <Loading />;
   }
 
-  console.log(academicYear);
-  console.log(grade);
-  console.log(classRoom);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted:", formData);
-  };
+  if (error && error.status && error.status === 500) {
+    return <ErrorServer />;
+  }
 
   return (
     <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-row border-e-2">
@@ -77,66 +137,78 @@ export default function StudentInput() {
               <p className="text-white mb-2 ">BIODATA</p>
               <Input
                 label="Nomor Induk Santri"
-                required="true"
+                required={true}
                 labelWidth="250px"
                 type="number"
                 name="nis"
+                onChange={handleChange}
               />
               <Input
                 label="Nama Lengkap"
+                required={true}
                 labelWidth="250px"
                 type="text"
                 name="fullname"
+                onChange={handleChange}
               />
               <Input
                 label="Tempat Lahir"
+                required={true}
                 labelWidth="250px"
                 type="text"
                 name="city_of_birth"
+                onChange={handleChange}
               />
               <Input
                 label="Tanggal Lahir"
+                required={true}
                 labelWidth="250px"
                 type="date"
                 name="birthdate"
+                onChange={handleChange}
               />
               <Input
                 label="Nama Ayah"
+                required={true}
                 labelWidth="250px"
                 type="text"
                 name="father_name"
+                onChange={handleChange}
               />
               <Input
                 label="Nama Ibu"
+                required={true}
                 labelWidth="250px"
                 type="text"
                 name="mother_name"
+                onChange={handleChange}
               />
               <Input
                 label="Nama Wali"
                 labelWidth="250px"
                 type="text"
                 name="guardian_name"
+                onChange={handleChange}
               />
               <Input
                 label="Alamat"
+                required={true}
                 labelWidth="250px"
                 type="text"
                 name="address"
+                onChange={handleChange}
               />
             </div>
             <div className="w-1/2 p-4 space-y-1">
               <p className="text-white mb-2">AKADEMIK</p>
               <Input
                 label="Tahun Ajaran"
+                required={true}
                 labelWidth="250px"
                 type="select"
                 name="academic_year"
-                options={[
-                  { label: "2020/2021", value: "321" },
-                  { label: "2021/2022", value: "212" },
-                  { label: "2022/2023", value: "222" },
-                ]}
+                options={academicYear}
+                onChange={handleChange}
               />
               <Input
                 label="Status"
@@ -148,41 +220,39 @@ export default function StudentInput() {
                   { label: "Boyong", value: "dropout" },
                 ]}
                 name="status"
+                onChange={handleChange}
               />
               <Input
                 label="Tingkat"
+                required={true}
                 labelWidth="250px"
                 type="select"
                 name="grade_id"
-                options={[
-                  { label: "1 wustho", value: "1232" },
-                  { label: "2 wustho", value: "123" },
-                  { label: "3 wustho", value: "233" },
-                ]}
+                options={grade}
+                onChange={handleChange}
               />
               <Input
                 label="Kelas"
+                required={true}
                 labelWidth="250px"
                 type="select"
-                name="class_id"
-                options={[
-                  { label: "A", value: "A" },
-                  { label: "B", value: "B" },
-                  { label: "C", value: "C" },
-                ]}
+                name="class_name_id"
+                options={classRoom}
+                onChange={handleChange}
               />
               <Input
                 label="Walikelas"
                 labelWidth="250px"
                 type="text"
                 name="homeroom_teacher"
+                homeroomTeacher={homeroomTeacher} // Pastikan ini terhubung dengan benar
+                readOnly // Menjadikan input ini hanya baca
               />
             </div>
           </div>
           <div className="flex flex-row justify-center mt-4">
             <button
               type="submit"
-              onClick={handleSubmit}
               className="bg-green-700 w-1/2 text-white px-4 py-2 rounded-md hover:bg-green-600"
             >
               Submit

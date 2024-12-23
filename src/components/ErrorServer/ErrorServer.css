@@ -1,6 +1,6 @@
 .box {
   color: white;
-  font-family: "Arial Black";
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   text-align: center;
   display: flex;
   justify-content: center;
@@ -32,7 +32,9 @@
 }
 
 .sub-text {
-  margin-bottom: 4em;
+  margin-bottom: 5em;
+  font-size: 20px;
+  font-weight: normal;
 }
 
 .link-back {
