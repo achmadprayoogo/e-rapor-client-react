@@ -3,6 +3,7 @@ import Input from "./Input";
 import Loading from "../Loading/Loading";
 import ErrorServer from "../ErrorServer/ErrorServer";
 import { getData, postData } from "../../fetcher";
+import Alert from "../Alert/Alert";
 
 export default function StudentInput() {
   const [formData, setFormData] = useState({});
@@ -16,6 +17,11 @@ export default function StudentInput() {
   const [homeroomTeacher, setHomeroomTeacher] = useState("Belum ada data");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAlert, setShowAlert] = useState({
+    isShow: false,
+    status: "default",
+    message: "",
+  });
 
   useEffect(() => {
     async function fetchData() {
@@ -83,8 +89,6 @@ export default function StudentInput() {
         `http://localhost:3000/api/admin/classname/find/${selectedClassNameId}`
       );
 
-      console.log(result);
-
       if (result) {
         setHomeroomTeacher(`Ust. ${result.data.attributes.homeroom_teacher}`);
       } else {
@@ -100,21 +104,34 @@ export default function StudentInput() {
   };
 
   const handleSubmit = async (e) => {
+    setShowAlert((prev) => ({ ...prev, isShow: false }));
     e.preventDefault();
 
-    setLoading(true);
     const result = await postData(
       "http://localhost:3000/api/admin/students/input",
       formData
     );
 
-    setLoading(false);
-
     if (result.error) {
+      console.log("error");
+      setShowAlert({
+        isShow: true,
+        status: "error",
+        message: "Gagal menyimpan data",
+      });
       setError(result.error);
     } else {
-      alert("Data santri berhasil diinput");
+      console.log("success");
+      setShowAlert({
+        isShow: true,
+        status: "success",
+        message: "Berhasil menyimpan data",
+      });
     }
+  };
+
+  const handleAlertClose = () => {
+    setShowAlert((prev) => ({ ...prev, isShow: false }));
   };
 
   if (loading) {
@@ -128,9 +145,18 @@ export default function StudentInput() {
   return (
     <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-row border-e-2">
       <div className="flex flex-col space-y-4 w-full p-4">
-        <h3 className="text-2xl font-bold mb- text-white text-center">
-          INPUT DATA SANTRI
-        </h3>
+        <div>
+          <h3 className="text-2xl font-bold mb- text-white text-center">
+            INPUT DATA SANTRI
+          </h3>
+          <Alert
+            initialHidden={!showAlert.isShow}
+            status={showAlert.status}
+            message={showAlert.message}
+            onClose={handleAlertClose}
+          />
+        </div>
+
         <form onSubmit={handleSubmit} className="w-full h-full">
           <div className="flex flex-row w-full">
             <div className="w-1/2 p-4 space-y-1">
