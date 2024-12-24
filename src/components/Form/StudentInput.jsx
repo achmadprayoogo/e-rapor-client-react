@@ -155,8 +155,11 @@ export default function StudentInput() {
 
   return (
     <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-row border-e-2">
-      <div className="flex flex-col space-y-4 w-full p-4">
+      <div className="relative flex flex-col space-y-4 w-full p-4">
         <div>
+          <a href="/biodata" className="text-white absolute top-4 left-4">
+            <span className="material-symbols-outlined">arrow_back</span>
+          </a>
           <h3 className="text-2xl font-bold mb- text-white text-center">
             INPUT DATA SANTRI
           </h3>

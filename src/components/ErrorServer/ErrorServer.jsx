@@ -37,7 +37,7 @@ export default function ErrorServer() {
       <p className="sub-text">
         Terjadi kesalahan pada server. Silahkan coba beberapa saat lagi.
       </p>
-      <a className="link-back" href="/biodata">
+      <a className="link-back" href="/">
         Kembali
       </a>
     </div>
