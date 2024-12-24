@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import Input from "./Input";
 import Loading from "../Loading/Loading";
 import ErrorServer from "../ErrorServer/ErrorServer";
-import { getData, postData } from "../../fetcher";
+import { getData } from "../../fetcher";
 import Alert from "../Alert/Alert";
+import axios from "axios";
 
 export default function StudentInput() {
   const [formData, setFormData] = useState({});
@@ -106,28 +107,38 @@ export default function StudentInput() {
   const handleSubmit = async (e) => {
     setShowAlert((prev) => ({ ...prev, isShow: false }));
     e.preventDefault();
-
-    try {
-      const result = await postData(
-        "http://localhost:3000/api/admin/students/input",
-        formData
-      );
-      console.log(result);
-      console.log("success");
-      setShowAlert({
-        isShow: true,
-        status: "success",
-        message: "Berhasil menyimpan data",
+    await axios
+      .post("http://localhost:3000/api/admin/students/input", formData)
+      .then((response) => {
+        console.log(response);
+        console.log("success");
+        setShowAlert({
+          isShow: true,
+          status: "success",
+          message: "Berhasil menyimpan data",
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error.response) {
+          const errorStatus = error.response.status;
+          console.log(errorStatus);
+          setError(error);
+          setShowAlert({
+            isShow: true,
+            status: "error",
+            message:
+              errorStatus === 409
+                ? "Nomor NIS telah dimasukkan sebelumnya"
+                : "Gagal menyimpan data",
+          });
+        } else if (error.request) {
+          console.log(`error.request`);
+          setError(error.status === 500 ? error : { status: 500 });
+        } else {
+          throw new Error("Terjadi kesalahan");
+        }
       });
-    } catch (error) {
-      console.log(error);
-      setError(error);
-      setShowAlert({
-        isShow: true,
-        status: "error",
-        message: "Gagal menyimpan data",
-      });
-    }
   };
 
   const handleAlertClose = () => {
@@ -241,6 +252,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="select"
                 options={[
+                  { label: "Pilih Status", value: "" },
                   { label: "Aktif", value: "active" },
                   { label: "Lulus", value: "graduate" },
                   { label: "Boyong", value: "dropout" },
