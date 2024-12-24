@@ -10,11 +10,15 @@ Alert.propTypes = {
 
 export default function Alert({ initialHidden, status, message, onClose }) {
   const [isSlidingOut, setIsSlidingOut] = useState(false);
+  const [isVisible, setIsVisible] = useState(!initialHidden);
 
   // Effect to handle visibility based on initialHidden prop
   useEffect(() => {
     if (initialHidden) {
       setIsSlidingOut(false); // Reset sliding out state if hidden
+      setIsVisible(false); // Hide the alert
+    } else {
+      setIsVisible(true); // Show the alert
     }
   }, [initialHidden]);
 
@@ -39,17 +43,17 @@ export default function Alert({ initialHidden, status, message, onClose }) {
     setIsSlidingOut(true);
     setTimeout(() => {
       onClose(); // Call the onClose function passed from the parent
-    }, 300); // Match this duration with the CSS transition duration
+    }, 300); // Wait for the transition to finish
   };
 
   return (
     <div
       className={`fixed h-10 min-w-96 pe-4 ${borderColor} flex flex-row border border-s-4 items-center ${textColor} right-0 top-10 z-10 bg-[#343a40] shadow-black shadow-lg transition-transform duration-300 ${
         initialHidden
-          ? "hidden" // Hide if initialHidden is true
+          ? "translate-x-full" // Slide out if initialHidden is true
           : isSlidingOut
-          ? "translate-x-full" // Slide out to the right
-          : "translate-x-0" // Stay in place
+          ? "translate-x-full" // Slide out if isSlidingOut is true
+          : "translate-x-0" // Slide in otherwise
       }`}
     >
       <span className="material-symbols-outlined p-2">

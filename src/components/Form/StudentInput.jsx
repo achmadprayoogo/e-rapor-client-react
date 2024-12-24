@@ -107,25 +107,25 @@ export default function StudentInput() {
     setShowAlert((prev) => ({ ...prev, isShow: false }));
     e.preventDefault();
 
-    const result = await postData(
-      "http://localhost:3000/api/admin/students/input",
-      formData
-    );
-
-    if (result.error) {
-      console.log("error");
-      setShowAlert({
-        isShow: true,
-        status: "error",
-        message: "Gagal menyimpan data",
-      });
-      setError(result.error);
-    } else {
+    try {
+      const result = await postData(
+        "http://localhost:3000/api/admin/students/input",
+        formData
+      );
+      console.log(result);
       console.log("success");
       setShowAlert({
         isShow: true,
         status: "success",
         message: "Berhasil menyimpan data",
+      });
+    } catch (error) {
+      console.log(error);
+      setError(error);
+      setShowAlert({
+        isShow: true,
+        status: "error",
+        message: "Gagal menyimpan data",
       });
     }
   };

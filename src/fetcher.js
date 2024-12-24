@@ -6,16 +6,19 @@ export async function getData(url) {
     return response.data;
   } catch (error) {
     console.error(error);
-    return { error: error.response.data, status: error.status };
+    return {
+      error: error.response?.data || error.message,
+      status: error.status || 500,
+    };
   }
 }
 
 export async function postData(url, data) {
   try {
     const response = await axios.post(url, data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error(error);
-    return { error: error.response.data, status: error.status };
+    throw new Error(error);
   }
 }
