@@ -169,6 +169,12 @@ export default function StudentInput() {
             message={showAlert.message}
             onClose={handleAlertClose}
           />
+          <a
+            href="/biodata-input"
+            className="text-white underline absolute top-4 right-4"
+          >
+            reset
+          </a>
         </div>
 
         <form onSubmit={handleSubmit} className="w-full h-full">
