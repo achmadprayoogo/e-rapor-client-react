@@ -2,33 +2,29 @@ import { useState, useEffect } from "react";
 import Input from "./Input";
 import Loading from "../Loading/Loading";
 import ErrorServer from "../ErrorServer/ErrorServer";
-import { getData } from "../../fetcher";
+import { getData, postData } from "../../fetcher";
 import Alert from "../Alert/Alert";
-import axios from "axios";
 
 export default function StudentInput() {
-  const [formData, setFormData] = useState({});
-  const [academicYear, setAcademicYear] = useState([
-    { label: "Belum ada data", value: "" },
-  ]);
-  const [grade, setGrade] = useState([{ label: "Belum ada data", value: "" }]);
-  const [classRoom, setClassRoom] = useState([
-    { label: "Belum ada data", value: "" },
-  ]);
-  const [homeroomTeacher, setHomeroomTeacher] = useState("Belum ada data");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showAlert, setShowAlert] = useState({
+  const initialOptions = [{ label: "Belum ada data", value: "" }];
+  const initialAlert = {
     isShow: false,
     status: "default",
     message: "",
-  });
+  };
+
+  const [formData, setFormData] = useState({});
+  const [academicYear, setAcademicYear] = useState(initialOptions);
+  const [grade, setGrade] = useState(initialOptions);
+  const [classRoom, setClassRoom] = useState(initialOptions);
+  const [homeroomTeacher, setHomeroomTeacher] = useState("Belum ada data");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showAlert, setShowAlert] = useState(initialAlert);
 
   useEffect(() => {
     async function fetchData() {
-      const resultData = await getData(
-        "http://localhost:3000/api/admin/academicyear"
-      );
+      const resultData = await getData("/api/admin/academicyear");
 
       if (resultData) {
         const academicYearData = resultData.data.map((year) => ({
@@ -52,9 +48,7 @@ export default function StudentInput() {
 
     if (name === "academic_year") {
       const selectedYearId = value;
-      const result = await getData(
-        `http://localhost:3000/api/admin/gradeclass/${selectedYearId}`
-      );
+      const result = await getData(`/api/admin/gradeclass/${selectedYearId}`);
 
       if (result) {
         const grades = result.data.map((grade) => ({
@@ -69,9 +63,7 @@ export default function StudentInput() {
       return;
     } else if (name === "grade_id") {
       const selectedGradeId = value;
-      const result = await getData(
-        `http://localhost:3000/api/admin/classname/${selectedGradeId}`
-      );
+      const result = await getData(`/api/admin/classname/${selectedGradeId}`);
 
       if (result) {
         const classes = result.data.map((classRoom) => ({
@@ -87,7 +79,7 @@ export default function StudentInput() {
     } else if (name === "class_name_id") {
       const selectedClassNameId = value;
       const result = await getData(
-        `http://localhost:3000/api/admin/classname/find/${selectedClassNameId}`
+        `/api/admin/classname/find/${selectedClassNameId}`
       );
 
       if (result) {
@@ -97,7 +89,6 @@ export default function StudentInput() {
       }
     }
 
-    // Update formData for other fields
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -107,38 +98,32 @@ export default function StudentInput() {
   const handleSubmit = async (e) => {
     setShowAlert((prev) => ({ ...prev, isShow: false }));
     e.preventDefault();
-    await axios
-      .post("http://localhost:3000/api/admin/students/input", formData)
-      .then((response) => {
-        console.log(response);
-        console.log("success");
+    const result = await postData("/api/admin/students/input", formData);
+
+    if (result.error) {
+      if (result.status === 409) {
+        console.log(`result.status === 409`);
         setShowAlert({
           isShow: true,
-          status: "success",
-          message: "Berhasil menyimpan data",
+          status: "error",
+          message: "Nomor NIS telah dimasukkan sebelumnya",
         });
-      })
-      .catch((error) => {
-        console.log(error);
-        if (error.response) {
-          const errorStatus = error.response.status;
-          console.log(errorStatus);
-          setError(error);
-          setShowAlert({
-            isShow: true,
-            status: "error",
-            message:
-              errorStatus === 409
-                ? "Nomor NIS telah dimasukkan sebelumnya"
-                : "Gagal menyimpan data",
-          });
-        } else if (error.request) {
-          console.log(`error.request`);
-          setError(error.status === 500 ? error : { status: 500 });
-        } else {
-          throw new Error("Terjadi kesalahan");
-        }
+      } else if (result.status === 500) {
+        setError(result);
+      } else {
+        setShowAlert({
+          isShow: true,
+          status: "error",
+          message: "Gagal menyimpan data",
+        });
+      }
+    } else {
+      setShowAlert({
+        isShow: true,
+        status: "success",
+        message: "Berhasil menyimpan data",
       });
+    }
   };
 
   const handleAlertClose = () => {
@@ -292,8 +277,8 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="text"
                 name="homeroom_teacher"
-                homeroomTeacher={homeroomTeacher} // Pastikan ini terhubung dengan benar
-                readOnly // Menjadikan input ini hanya baca
+                homeroomTeacher={homeroomTeacher}
+                readOnly
               />
             </div>
           </div>

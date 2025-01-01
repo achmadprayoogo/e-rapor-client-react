@@ -23,16 +23,21 @@ const ROW_HEADERS = [
 function TabelBiodata() {
   const [students, setStudents] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState({ status: 200 });
 
   useEffect(() => {
     async function fetchData() {
       const resultData = await getData(
-        "http://localhost:3000/api/admin/students?page[number]=1&page[size]=20"
+        "/api/admin/students?page[number]=1&page[size]=20"
       );
-      if (resultData) {
+
+      setLoading(false);
+
+      if (resultData.error) {
+        setError(resultData);
+      } else {
         setStudents(resultData);
       }
-      setLoading(false);
     }
     fetchData();
   }, []);
@@ -59,7 +64,7 @@ function TabelBiodata() {
     return <Loading />;
   }
 
-  if (!students) {
+  if (error.status === 500) {
     return <ErrorServer />;
   }
 
