@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import PageNavbar from "./PageNavbar";
 import TabelBiodata from "./Tables/TabelBiodata";
 import TabelSettings from "./Tables/TabelSettings";
-import StudentInput from "./Form/StudentInput";
+import StudentInput from "./Form/Student/StudentInput";
+import StudentUpdate from "./Form/Student/StudentUpdate";
+import StudentDelete from "./Form/Student/StudentDelete";
 
 function Page() {
   const [currentPage, setCurrentPage] = useState("biodata");
@@ -18,6 +20,10 @@ function Page() {
         return <TabelBiodata />;
       case "biodata-input":
         return <StudentInput />;
+      case "biodata-update":
+        return <StudentUpdate />;
+      case "biodata-delete":
+        return <StudentDelete />;
       case "setting":
         return <TabelSettings />;
       default:

@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import Input from "./Input";
-import Loading from "../Loading/Loading";
-import ErrorServer from "../ErrorServer/ErrorServer";
-import { getData, postData } from "../../fetcher";
-import Alert from "../Alert/Alert";
+import Input from "../Input";
+import Loading from "../../Loading/Loading";
+import ErrorServer from "../../ErrorServer/ErrorServer";
+import NotFoundError from "../../NotFoundError/NotFoundError";
+import { deleteData, getData, patchData } from "../../../fetcher";
+import Alert from "../../Alert/Alert";
 
 export default function StudentInput() {
-  const initialOptions = [{ label: "Belum ada data", value: "" }];
   const initialAlert = {
     isShow: false,
     status: "default",
@@ -14,80 +14,47 @@ export default function StudentInput() {
   };
 
   const [formData, setFormData] = useState({});
-  const [academicYear, setAcademicYear] = useState(initialOptions);
-  const [grade, setGrade] = useState(initialOptions);
-  const [classRoom, setClassRoom] = useState(initialOptions);
-  const [homeroomTeacher, setHomeroomTeacher] = useState("Belum ada data");
+  const [isUpdate, setIsUpdate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAlert, setShowAlert] = useState(initialAlert);
+  const [lastData, setLastData] = useState({});
+  const studentId = window.location.search.split("=")[1];
 
   useEffect(() => {
-    async function fetchData() {
-      const resultData = await getData("/api/admin/academicyear");
-
-      if (resultData) {
-        const academicYearData = resultData.data.map((year) => ({
-          label: year.attributes.academic_year,
-          value: year.id,
-        }));
-
-        setAcademicYear([
-          { label: "Pilih Tahun Ajaran", value: "" },
-          ...academicYearData,
-        ]);
+    async function getStudentData() {
+      setLoading(true);
+      const result = await getData(`/api/admin/student/${studentId}`);
+      console.log(result);
+      if (result.error) {
+        setError(result);
       }
       setLoading(false);
-    }
 
-    fetchData();
-  }, [academicYear]);
+      const studentData = {
+        ...result.data.data.attributes,
+        id: result.data.data.id,
+        nis: result.data.data.attributes.nis.toString(),
+        birthdate: result.data.data.attributes.birthdate
+          .split("T")[0]
+          .toString(),
+        created_at: undefined,
+        updated_at: undefined,
+      };
+      setFormData(studentData);
+      setLastData(studentData);
+    }
+    getStudentData();
+  }, [studentId]);
+
+  useEffect(() => {
+    const hasChanges = JSON.stringify(lastData) !== JSON.stringify(formData);
+
+    setIsUpdate(hasChanges);
+  }, [formData, lastData]);
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
-
-    if (name === "academic_year") {
-      const selectedYearId = value;
-      const result = await getData(`/api/admin/gradeclass/${selectedYearId}`);
-
-      if (result) {
-        const grades = result.data.map((grade) => ({
-          label: grade.attributes.grade_class,
-          value: grade.id,
-        }));
-        setGrade([{ label: "Pilih Tingkat", value: "" }, ...grades]);
-      } else {
-        console.error("Failed to fetch grade data");
-      }
-
-      return;
-    } else if (name === "grade_id") {
-      const selectedGradeId = value;
-      const result = await getData(`/api/admin/classname/${selectedGradeId}`);
-
-      if (result) {
-        const classes = result.data.map((classRoom) => ({
-          label: classRoom.attributes.class_name,
-          value: classRoom.id,
-        }));
-        setClassRoom([{ label: "Pilih Kelas", value: "" }, ...classes]);
-      } else {
-        console.error("Failed to fetch class data");
-      }
-
-      return;
-    } else if (name === "class_name_id") {
-      const selectedClassNameId = value;
-      const result = await getData(
-        `/api/admin/classname/find/${selectedClassNameId}`
-      );
-
-      if (result) {
-        setHomeroomTeacher(`Ust. ${result.data.attributes.homeroom_teacher}`);
-      } else {
-        console.error("Failed to find homeroom teacher data");
-      }
-    }
 
     setFormData((prevData) => ({
       ...prevData,
@@ -96,9 +63,10 @@ export default function StudentInput() {
   };
 
   const handleSubmit = async (e) => {
+    console.log("submit");
     setShowAlert((prev) => ({ ...prev, isShow: false }));
     e.preventDefault();
-    const result = await postData("/api/admin/students/input", formData);
+    const result = await patchData("/api/admin/students/update", formData);
 
     if (result.error) {
       if (result.status === 409) {
@@ -123,7 +91,12 @@ export default function StudentInput() {
         status: "success",
         message: "Berhasil menyimpan data",
       });
+      setIsUpdate(false);
     }
+  };
+
+  const handleDelete = async () => {
+    window.location.href = "/biodata-delete?id=" + studentId;
   };
 
   const handleAlertClose = () => {
@@ -138,6 +111,10 @@ export default function StudentInput() {
     return <ErrorServer />;
   }
 
+  if (error && error.status && error.status === 404) {
+    return <NotFoundError data={"Santri"} />;
+  }
+
   return (
     <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-row border-e-2">
       <div className="relative flex flex-col space-y-4 w-full p-4">
@@ -146,7 +123,7 @@ export default function StudentInput() {
             <span className="material-symbols-outlined">arrow_back</span>
           </a>
           <h3 className="text-2xl font-bold mb- text-white text-center">
-            INPUT DATA SANTRI
+            UPDATE DATA SANTRI
           </h3>
           <Alert
             initialHidden={!showAlert.isShow}
@@ -154,17 +131,22 @@ export default function StudentInput() {
             message={showAlert.message}
             onClose={handleAlertClose}
           />
-          <a
-            href="/biodata-input"
-            className="text-white underline absolute top-4 right-4"
-          >
-            reset
-          </a>
+          <div className="text-white underline absolute top-4 right-4 flex flex-row space-x-4">
+            <a
+              href={window.location.pathname + window.location.search}
+              className=""
+            >
+              reset
+            </a>
+            <button onClick={handleDelete} className="text-red-500">
+              delete
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="w-full h-full">
           <div className="flex flex-row w-full">
-            <div className="w-1/2 p-4 space-y-1">
+            <div className="w-full p-4 space-y-1">
               <p className="text-white mb-2 ">BIODATA</p>
               <Input
                 label="Nomor Induk Santri"
@@ -172,6 +154,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="number"
                 name="nis"
+                value={formData.nis}
                 onChange={handleChange}
               />
               <Input
@@ -180,6 +163,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="text"
                 name="fullname"
+                value={formData.fullname}
                 onChange={handleChange}
               />
               <Input
@@ -188,6 +172,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="text"
                 name="city_of_birth"
+                value={formData.city_of_birth}
                 onChange={handleChange}
               />
               <Input
@@ -196,6 +181,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="date"
                 name="birthdate"
+                value={formData.birthdate}
                 onChange={handleChange}
               />
               <Input
@@ -204,6 +190,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="text"
                 name="father_name"
+                value={formData.father_name}
                 onChange={handleChange}
               />
               <Input
@@ -212,6 +199,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="text"
                 name="mother_name"
+                value={formData.mother_name}
                 onChange={handleChange}
               />
               <Input
@@ -219,6 +207,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="text"
                 name="guardian_name"
+                value={formData.guardian_name}
                 onChange={handleChange}
               />
               <Input
@@ -227,67 +216,20 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="text"
                 name="address"
+                value={formData.address}
                 onChange={handleChange}
-              />
-            </div>
-            <div className="w-1/2 p-4 space-y-1">
-              <p className="text-white mb-2">AKADEMIK</p>
-              <Input
-                label="Tahun Ajaran"
-                required={true}
-                labelWidth="250px"
-                type="select"
-                name="academic_year"
-                options={academicYear}
-                onChange={handleChange}
-              />
-              <Input
-                label="Status"
-                labelWidth="250px"
-                type="select"
-                options={[
-                  { label: "Pilih Status", value: "" },
-                  { label: "Aktif", value: "active" },
-                  { label: "Lulus", value: "graduate" },
-                  { label: "Boyong", value: "dropout" },
-                ]}
-                name="status"
-                onChange={handleChange}
-              />
-              <Input
-                label="Tingkat"
-                required={true}
-                labelWidth="250px"
-                type="select"
-                name="grade_id"
-                options={grade}
-                onChange={handleChange}
-              />
-              <Input
-                label="Kelas"
-                required={true}
-                labelWidth="250px"
-                type="select"
-                name="class_name_id"
-                options={classRoom}
-                onChange={handleChange}
-              />
-              <Input
-                label="Walikelas"
-                labelWidth="250px"
-                type="text"
-                name="homeroom_teacher"
-                homeroomTeacher={homeroomTeacher}
-                readOnly
               />
             </div>
           </div>
           <div className="flex flex-row justify-center mt-4">
             <button
               type="submit"
-              className="bg-green-700 w-1/2 text-white px-4 py-2 rounded-md hover:bg-green-600"
+              disabled={!isUpdate}
+              className={`${
+                isUpdate ? "bg-yellow-500" : "bg-slate-500"
+              } w-1/2 text-white px-4 py-2 rounded-md font-semibold`}
             >
-              Submit
+              Update
             </button>
           </div>
         </form>

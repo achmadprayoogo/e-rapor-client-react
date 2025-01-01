@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import "./Input.css";
 
 Input.propTypes = {
   label: PropTypes.string.isRequired,
@@ -7,6 +8,8 @@ Input.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   homeroomTeacher: PropTypes.string,
+  value: PropTypes.string,
+  readOnly: PropTypes.bool,
   onChange: PropTypes.func,
   options: PropTypes.arrayOf(
     PropTypes.shape({
@@ -23,6 +26,8 @@ export default function Input({
   options,
   labelWidth,
   required,
+  value,
+  readOnly,
   onChange,
   homeroomTeacher,
 }) {
@@ -30,6 +35,7 @@ export default function Input({
     name,
     onChange,
     required,
+    readOnly,
     className:
       "font-mono block w-full border-b bg-transparent text-lg text-white focus:outline-none pb-1",
   };
@@ -59,6 +65,7 @@ export default function Input({
       ) : (
         <input
           type={type}
+          value={value}
           placeholder={name === "homeroom_teacher" ? homeroomTeacher : ""}
           readOnly={name === "homeroom_teacher"}
           {...commonProps}

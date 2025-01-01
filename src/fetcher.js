@@ -54,3 +54,33 @@ export async function postData(url, data) {
     };
   }
 }
+
+export async function patchData(url, data) {
+  try {
+    const axiosJson = createAxiosJsonInstance();
+    const response = await axiosJson.patch(url, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return {
+      error: error.response?.data || error.message,
+      type: getErrorType(error),
+      status: error.status || 500,
+    };
+  }
+}
+
+export async function deleteData(url, data) {
+  try {
+    const axiosJson = createAxiosJsonInstance();
+    const response = await axiosJson.delete(url, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return {
+      error: error.response?.data || error.message,
+      type: getErrorType(error),
+      status: error.status || 500,
+    };
+  }
+}

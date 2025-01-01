@@ -60,6 +60,11 @@ function TabelBiodata() {
     }
   }, [students]);
 
+  const handleDoubleClick = (e) => {
+    const id = e.target.parentElement.id;
+    document.location.href = `${location.origin}/biodata-update?id=${id}`;
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -124,7 +129,12 @@ function TabelBiodata() {
 
           <tbody>
             {data.map((student, index) => (
-              <tr key={student.id} className="hover:bg-gray-700">
+              <tr
+                key={student.id}
+                id={student.id}
+                className="hover:bg-gray-700"
+                onDoubleClick={handleDoubleClick}
+              >
                 <td className="border-b text-white text-center p-2 whitespace-nowrap">
                   {students.meta.page.from + index}
                 </td>
