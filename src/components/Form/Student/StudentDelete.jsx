@@ -3,74 +3,65 @@ import Input from "../Input";
 import Loading from "../../Loading/Loading";
 import ErrorServer from "../../ErrorServer/ErrorServer";
 import NotFoundError from "../../NotFoundError/NotFoundError";
-import { deleteData, getData } from "../../../fetcher";
+import { deleteData } from "../../../../fetcher";
 import Alert from "../../Alert/Alert";
+import ContentContainer from "../../ContentContainer";
+import { initialAlert } from "../../../../initialStates";
+import Helper from "../../../../helper";
 
 export default function StudentInput() {
-  const initialAlert = {
-    isShow: false,
-    status: "default",
-    message: "",
-  };
-
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAlert, setShowAlert] = useState(initialAlert);
+  const [alert, setAlert] = useState(initialAlert);
   const studentId = window.location.search.split("=")[1];
 
   useEffect(() => {
     async function getStudentData() {
-      setLoading(true);
-      const result = await getData(`/api/admin/student/${studentId}`);
-      console.log(result);
+      const result = await Helper.getStudentData(studentId);
+
       if (result.error) {
         setError(result);
       }
-      setLoading(false);
 
-      const studentData = {
-        ...result.data.data.attributes,
-        id: result.data.data.id,
-        nis: result.data.data.attributes.nis.toString(),
-        birthdate: result.data.data.attributes.birthdate
-          .split("T")[0]
-          .toString(),
-        created_at: undefined,
-        updated_at: undefined,
-      };
-      setFormData(studentData);
+      setLoading(false);
+      setFormData(result);
     }
     getStudentData();
   }, [studentId]);
 
-  const handleSubmit = async () => {
-    setShowAlert((prev) => ({ ...prev, isShow: false }));
+  const handleSubmit = async (e) => {
+    setAlert(Helper.closeAlert());
+    e.preventDefault();
+
     const result = await deleteData(
       `/api/admin/students/delete?id=${studentId}`
     );
 
-    if (result.error) {
-      if (result.status === 500) {
+    switch (result.status) {
+      case 200:
+        setAlert(Helper.successAlert());
+        break;
+      case 500:
         setError(result);
-      } else {
-        setShowAlert({
-          isShow: true,
-          status: "error",
-          message: "Gagal menghapus data",
-        });
-      }
-    } else {
-      setShowAlert({
-        isShow: true,
-        status: "success",
-        message: "Berhasil menghapus data",
-      });
+        break;
+      case 404:
+        setAlert(Helper.notFoundAlert());
+        break;
+      default:
+        setAlert(Helper.errorAlert());
+        break;
     }
+
+    setTimeout(() => setAlert(Helper.closeAlert()), 3000);
+  };
+
+  const handleCancel = () => {
+    window.location.href = `${location.origin}/biodata-update?id=${studentId}`;
   };
 
   const handleAlertClose = () => {
-    setShowAlert((prev) => ({ ...prev, isShow: false }));
+    setAlert(Helper.closeAlert());
   };
 
   if (loading) {
@@ -86,7 +77,7 @@ export default function StudentInput() {
   }
 
   return (
-    <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-row border-e-2">
+    <ContentContainer>
       <div className="relative flex flex-col space-y-4 w-full p-4">
         <div>
           <a href="/biodata" className="text-white absolute top-4 left-4">
@@ -96,9 +87,9 @@ export default function StudentInput() {
             DELETE DATA SANTRI
           </h3>
           <Alert
-            initialHidden={!showAlert.isShow}
-            status={showAlert.status}
-            message={showAlert.message}
+            isShow={!alert.isShow}
+            status={alert.status}
+            message={alert.message}
             onClose={handleAlertClose}
           />
         </div>
@@ -199,9 +190,7 @@ export default function StudentInput() {
             </button>
             <button
               type="button"
-              onClick={() =>
-                (window.location.href = `${location.origin}/biodata-update?id=${studentId}`)
-              }
+              onClick={handleCancel}
               className={`bg-lime-600 w-1/3 text-white px-4 py-2 rounded-md font-semibold`}
             >
               Batalkan
@@ -209,6 +198,6 @@ export default function StudentInput() {
           </div>
         </form>
       </div>
-    </div>
+    </ContentContainer>
   );
 }

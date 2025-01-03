@@ -1,29 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
-import TablePagination from "../TablePagination";
+import { useState, useCallback, useEffect } from "react";
+import TablePagination from "./TablePagination";
 import Toolbar from "../Toolbar/Toolbar";
-import { getData } from "../../fetcher";
-import { parseISO, isValid } from "date-fns";
+import { getData, searchData } from "../../../fetcher";
 import Loading from "../Loading/Loading";
 import ErrorServer from "../ErrorServer/ErrorServer";
-
-const ROW_HEADERS = [
-  "No",
-  "NIS",
-  "Nama Lengkap",
-  "Umur",
-  "Tempat Lahir",
-  "Tanggal Lahir",
-  "Nama Ayah",
-  "Nama Ibu",
-  "Nama Wali",
-  "Status",
-  "Alamat",
-];
+import TableHeader from "./TableHeader";
+import TableData from "./TableData";
+import Helper from "../../../helper";
 
 function TabelBiodata() {
   const [students, setStudents] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState({ status: 200 });
+  const [nameOrder, setNameOrder] = useState("asc");
+  const [ageOrder, setAgeOrder] = useState("asc");
 
   useEffect(() => {
     async function fetchData() {
@@ -65,6 +55,21 @@ function TabelBiodata() {
     document.location.href = `${location.origin}/biodata-update?id=${id}`;
   };
 
+  const handleSearch = async (searchQuery) => {
+    const result = await searchData(
+      `/api/admin/students?page[number]=1&page[size]=20&search=${searchQuery}`
+    );
+    setStudents(result);
+  };
+
+  const handleNameShort = async () => {
+    setNameOrder(nameOrder === "asc" ? "desc" : "asc");
+  };
+
+  const handleAgeShort = async () => {
+    setAgeOrder(ageOrder === "asc" ? "desc" : "asc");
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -74,31 +79,13 @@ function TabelBiodata() {
   }
 
   const data = students.data.map((student) => {
-    const birthDate = parseISO(student.attributes.birthdate);
-    if (isValid(birthDate)) {
-      const age = new Date().getFullYear() - birthDate.getFullYear();
-      return {
-        ...student,
-        attributes: {
-          ...student.attributes,
-          age,
-          birthdate: birthDate.toLocaleString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          }),
-        },
-      };
-    } else {
-      console.error("Invalid date:", student.attributes.birthdate);
-      return student;
-    }
+    return Helper.formatStudentData(student);
   });
 
   return (
     <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-col border-e-2">
       <Toolbar
-        onSearch={() => console.log("Search data")}
+        onSearch={handleSearch}
         toolbarItems={[
           {
             icon: "add",
@@ -116,14 +103,21 @@ function TabelBiodata() {
         <table className="w-full border-separate border-spacing-0">
           <thead className="sticky top-0 bg-[#343a40]">
             <tr>
-              {ROW_HEADERS.map((header) => (
-                <th
-                  key={header}
-                  className="text-white p-2 font-bold border-b text-left whitespace-nowrap"
-                >
-                  {header}
-                </th>
-              ))}
+              <TableHeader>No</TableHeader>
+              <TableHeader>NIS</TableHeader>
+              <TableHeader filter onClick={handleNameShort} order={nameOrder}>
+                Nama
+              </TableHeader>
+              <TableHeader filter onClick={handleAgeShort} order={ageOrder}>
+                Umur
+              </TableHeader>
+              <TableHeader>Tempat Lahir</TableHeader>
+              <TableHeader>Tanngal Lahir</TableHeader>
+              <TableHeader>Nama Ayah</TableHeader>
+              <TableHeader>Nama Ibu</TableHeader>
+              <TableHeader>Nama Wali</TableHeader>
+              <TableHeader filter>Status</TableHeader>
+              <TableHeader>Alamat</TableHeader>
             </tr>
           </thead>
 
@@ -135,39 +129,19 @@ function TabelBiodata() {
                 className="hover:bg-gray-700"
                 onDoubleClick={handleDoubleClick}
               >
-                <td className="border-b text-white text-center p-2 whitespace-nowrap">
+                <TableData align={"center"}>
                   {students.meta.page.from + index}
-                </td>
-                <td className="border-b text-white text-center p-2 whitespace-nowrap">
-                  {student.attributes.nis}
-                </td>
-                <td className="border-b text-white p-2 whitespace-nowrap">
-                  {student.attributes.fullname}
-                </td>
-                <td className="border-b text-white p-2 text-center whitespace-nowrap">
-                  {student.attributes.age}
-                </td>
-                <td className="border-b text-white p-2 whitespace-nowrap">
-                  {student.attributes.city_of_birth}
-                </td>
-                <td className="border-b text-white p-2 whitespace-nowrap">
-                  {student.attributes.birthdate}
-                </td>
-                <td className="border-b text-white p-2 whitespace-nowrap">
-                  {student.attributes.father_name}
-                </td>
-                <td className="border-b text-white p-2 whitespace-nowrap">
-                  {student.attributes.mother_name}
-                </td>
-                <td className="border-b text-white p-2 whitespace-nowrap">
-                  {student.attributes.guardian_name || "-"}
-                </td>
-                <td className="border-b text-white text-center p-2 whitespace-nowrap">
-                  {student.attributes.status || "-"}
-                </td>
-                <td className="border-b text-white p-2 whitespace-nowrap">
-                  {student.attributes.address}
-                </td>
+                </TableData>
+                <TableData align={"center"}>{student.nis}</TableData>
+                <TableData>{student.fullname}</TableData>
+                <TableData align={"center"}>{student.age}</TableData>
+                <TableData>{student.city_of_birth}</TableData>
+                <TableData>{student.birthdate}</TableData>
+                <TableData>{student.father_name}</TableData>
+                <TableData>{student.mother_name}</TableData>
+                <TableData>{student.guardian_name || "-"}</TableData>
+                <TableData align={"center"}>{student.status || "-"}</TableData>
+                <TableData>{student.address}</TableData>
               </tr>
             ))}
           </tbody>

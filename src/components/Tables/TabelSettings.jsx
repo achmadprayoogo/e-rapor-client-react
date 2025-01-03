@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TablePagination from "../TablePagination";
+import TablePagination from "./TablePagination";
 import Toolbar from "../Toolbar/Toolbar";
 import FormAcademicYear from "../Form/FormAcademicYear";
 

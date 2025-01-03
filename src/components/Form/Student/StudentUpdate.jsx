@@ -3,53 +3,42 @@ import Input from "../Input";
 import Loading from "../../Loading/Loading";
 import ErrorServer from "../../ErrorServer/ErrorServer";
 import NotFoundError from "../../NotFoundError/NotFoundError";
-import { deleteData, getData, patchData } from "../../../fetcher";
 import Alert from "../../Alert/Alert";
+import { initialAlert } from "../../../../initialStates";
+import { patchData } from "../../../../fetcher";
+import Helper from "../../../../helper";
+import TitleInput from "../TitleInput";
+import BackButton from "../BackButton";
+import ContentContainer from "../../ContentContainer";
 
 export default function StudentInput() {
-  const initialAlert = {
-    isShow: false,
-    status: "default",
-    message: "",
-  };
-
   const [formData, setFormData] = useState({});
   const [isUpdate, setIsUpdate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAlert, setShowAlert] = useState(initialAlert);
+  const [alert, setAlert] = useState(initialAlert);
   const [lastData, setLastData] = useState({});
   const studentId = window.location.search.split("=")[1];
 
   useEffect(() => {
     async function getStudentData() {
       setLoading(true);
-      const result = await getData(`/api/admin/student/${studentId}`);
-      console.log(result);
+      const result = await Helper.getStudentData(studentId);
+
       if (result.error) {
         setError(result);
       }
+
       setLoading(false);
 
-      const studentData = {
-        ...result.data.data.attributes,
-        id: result.data.data.id,
-        nis: result.data.data.attributes.nis.toString(),
-        birthdate: result.data.data.attributes.birthdate
-          .split("T")[0]
-          .toString(),
-        created_at: undefined,
-        updated_at: undefined,
-      };
-      setFormData(studentData);
-      setLastData(studentData);
+      setFormData({ ...result, age: undefined });
+      setLastData({ ...result, age: undefined });
     }
     getStudentData();
   }, [studentId]);
 
   useEffect(() => {
     const hasChanges = JSON.stringify(lastData) !== JSON.stringify(formData);
-
     setIsUpdate(hasChanges);
   }, [formData, lastData]);
 
@@ -63,35 +52,27 @@ export default function StudentInput() {
   };
 
   const handleSubmit = async (e) => {
-    console.log("submit");
-    setShowAlert((prev) => ({ ...prev, isShow: false }));
+    setAlert(Helper.closeAlert());
     e.preventDefault();
     const result = await patchData("/api/admin/students/update", formData);
+    const newData = await Helper.formatStudentData(result.data.data);
 
-    if (result.error) {
-      if (result.status === 409) {
-        console.log(`result.status === 409`);
-        setShowAlert({
-          isShow: true,
-          status: "error",
-          message: "Nomor NIS telah dimasukkan sebelumnya",
-        });
-      } else if (result.status === 500) {
+    switch (result.status) {
+      case 200:
+        setAlert(Helper.successAlert());
+
+        setLastData({ ...newData, age: undefined });
+        setFormData({ ...newData, age: undefined });
+        break;
+      case 409:
+        setAlert(Helper.confilctAlert());
+        break;
+      case 500:
         setError(result);
-      } else {
-        setShowAlert({
-          isShow: true,
-          status: "error",
-          message: "Gagal menyimpan data",
-        });
-      }
-    } else {
-      setShowAlert({
-        isShow: true,
-        status: "success",
-        message: "Berhasil menyimpan data",
-      });
-      setIsUpdate(false);
+        break;
+      default:
+        setAlert(Helper.errorAlert());
+        break;
     }
   };
 
@@ -100,7 +81,7 @@ export default function StudentInput() {
   };
 
   const handleAlertClose = () => {
-    setShowAlert((prev) => ({ ...prev, isShow: false }));
+    setAlert(Helper.closeAlert());
   };
 
   if (loading) {
@@ -116,26 +97,19 @@ export default function StudentInput() {
   }
 
   return (
-    <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-row border-e-2">
+    <ContentContainer>
       <div className="relative flex flex-col space-y-4 w-full p-4">
         <div>
-          <a href="/biodata" className="text-white absolute top-4 left-4">
-            <span className="material-symbols-outlined">arrow_back</span>
-          </a>
-          <h3 className="text-2xl font-bold mb- text-white text-center">
-            UPDATE DATA SANTRI
-          </h3>
+          <BackButton link="/biodata" />
+          <TitleInput>UPDATE DATA SANTRI</TitleInput>
           <Alert
-            initialHidden={!showAlert.isShow}
-            status={showAlert.status}
-            message={showAlert.message}
+            isShow={!alert.isShow}
+            status={alert.status}
+            message={alert.message}
             onClose={handleAlertClose}
           />
           <div className="text-white underline absolute top-4 right-4 flex flex-row space-x-4">
-            <a
-              href={window.location.pathname + window.location.search}
-              className=""
-            >
+            <a href={window.location.pathname + window.location.search}>
               reset
             </a>
             <button onClick={handleDelete} className="text-red-500">
@@ -234,6 +208,6 @@ export default function StudentInput() {
           </div>
         </form>
       </div>
-    </div>
+    </ContentContainer>
   );
 }

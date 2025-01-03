@@ -22,6 +22,10 @@ function getErrorType(error) {
       errorType = "error";
       break;
   }
+
+  if (errorType === "response") {
+    console.log("Response error:", error.response.data);
+  }
   return errorType;
 }
 
@@ -32,6 +36,20 @@ export async function getData(url) {
     return response.data;
   } catch (error) {
     console.error(error);
+    return {
+      error: error.response?.data || error.message,
+      type: getErrorType(error),
+      status: error.status || 500,
+    };
+  }
+}
+
+export async function searchData(url) {
+  try {
+    const axiosJson = createAxiosJsonInstance();
+    const response = await axiosJson.get(url);
+    return response.data;
+  } catch (error) {
     return {
       error: error.response?.data || error.message,
       type: getErrorType(error),
