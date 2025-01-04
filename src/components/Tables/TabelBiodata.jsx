@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import propTypes from "prop-types";
 import TablePagination from "./TablePagination";
 import Toolbar from "../Toolbar/Toolbar";
 import { getData, searchData } from "../../../fetcher";
@@ -8,47 +9,88 @@ import TableHeader from "./TableHeader";
 import TableData from "./TableData";
 import Helper from "../../../helper";
 
-function TabelBiodata() {
-  const [students, setStudents] = useState(null);
+TabelBiodata.propTypes = {
+  academicYearSelected: propTypes.string, // first definition at App.jsx
+};
+
+function TabelBiodata({ academicYearSelected }) {
+  const [students, setStudents] = useState(null); // Change back to null for proper checks
+  const [dataFetch, setDataFetch] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState({ status: 200 });
   const [nameOrder, setNameOrder] = useState("asc");
   const [ageOrder, setAgeOrder] = useState("asc");
 
   useEffect(() => {
+    let isMounted = true; // Add mounted check
+
     async function fetchData() {
-      const resultData = await getData(
-        "/api/admin/students?page[number]=1&page[size]=20"
-      );
+      try {
+        setLoading(true); // Set loading at start of fetch
+        const resultData = await getData(
+          "/api/admin/students?page[number]=1&page[size]=20&filter[academic_year_id]=" +
+            academicYearSelected
+        );
 
-      setLoading(false);
+        console.log(resultData);
 
-      if (resultData.error) {
-        setError(resultData);
-      } else {
-        setStudents(resultData);
+        if (!isMounted) return;
+
+        if (resultData.error) {
+          setError(resultData);
+        } else {
+          setDataFetch(resultData);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
     fetchData();
-  }, []);
+    return () => {
+      isMounted = false; // Cleanup on unmount
+    };
+  }, [academicYearSelected]);
+
+  useEffect(() => {
+    if (dataFetch) {
+      console.log(dataFetch);
+      const formatedData = dataFetch.data.map((student) => {
+        const result = Helper.formatStudentData(student);
+        return result;
+      });
+      console.log(formatedData);
+      setStudents(formatedData);
+    }
+  }, [dataFetch]);
 
   const handlePageNext = useCallback(async () => {
-    if (students && students.links.next) {
-      const resultData = await getData(students.links.next);
+    if (dataFetch && dataFetch.links.next) {
+      setLoading(true);
+      const resultData = await getData(dataFetch.links.next);
       if (resultData) {
-        setStudents(resultData);
+        setDataFetch(resultData);
+        setStudents(resultData.data); // Add this line
       }
+      setLoading(false);
     }
-  }, [students]);
+  }, [dataFetch]);
 
   const handlePagePrev = useCallback(async () => {
-    if (students && students.links.prev) {
-      const resultData = await getData(students.links.prev);
+    if (dataFetch && dataFetch.links.prev) {
+      setLoading(true);
+      const resultData = await getData(dataFetch.links.prev);
       if (resultData) {
-        setStudents(resultData);
+        setDataFetch(resultData);
+        setStudents(resultData.data); // Add this line
       }
+      setLoading(false);
     }
-  }, [students]);
+  }, [dataFetch]);
 
   const handleDoubleClick = (e) => {
     const id = e.target.parentElement.id;
@@ -59,7 +101,7 @@ function TabelBiodata() {
     const result = await searchData(
       `/api/admin/students?page[number]=1&page[size]=20&search=${searchQuery}`
     );
-    setStudents(result);
+    setDataFetch(result);
   };
 
   const handleNameShort = async () => {
@@ -70,6 +112,7 @@ function TabelBiodata() {
     setAgeOrder(ageOrder === "asc" ? "desc" : "asc");
   };
 
+  // Early return conditions
   if (loading) {
     return <Loading />;
   }
@@ -78,10 +121,12 @@ function TabelBiodata() {
     return <ErrorServer />;
   }
 
-  const data = students.data.map((student) => {
-    return Helper.formatStudentData(student);
-  });
+  // Add this check
+  if (!students || !dataFetch) {
+    return <Loading />;
+  }
 
+  // Only render the main component when we have both students and dataFetch
   return (
     <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-col border-e-2">
       <Toolbar
@@ -116,13 +161,15 @@ function TabelBiodata() {
               <TableHeader>Nama Ayah</TableHeader>
               <TableHeader>Nama Ibu</TableHeader>
               <TableHeader>Nama Wali</TableHeader>
-              <TableHeader filter>Status</TableHeader>
+              {academicYearSelected ? (
+                <TableHeader filter>Status</TableHeader>
+              ) : null}
               <TableHeader>Alamat</TableHeader>
             </tr>
           </thead>
 
           <tbody>
-            {data.map((student, index) => (
+            {students.map((student, index) => (
               <tr
                 key={student.id}
                 id={student.id}
@@ -130,7 +177,7 @@ function TabelBiodata() {
                 onDoubleClick={handleDoubleClick}
               >
                 <TableData align={"center"}>
-                  {students.meta.page.from + index}
+                  {dataFetch.meta.page.from + index}
                 </TableData>
                 <TableData align={"center"}>{student.nis}</TableData>
                 <TableData>{student.fullname}</TableData>
@@ -140,7 +187,11 @@ function TabelBiodata() {
                 <TableData>{student.father_name}</TableData>
                 <TableData>{student.mother_name}</TableData>
                 <TableData>{student.guardian_name || "-"}</TableData>
-                <TableData align={"center"}>{student.status || "-"}</TableData>
+                {academicYearSelected ? (
+                  <TableData align={"center"}>
+                    {student.status || "-"}
+                  </TableData>
+                ) : null}
                 <TableData>{student.address}</TableData>
               </tr>
             ))}
@@ -148,8 +199,8 @@ function TabelBiodata() {
         </table>
       </div>
       <TablePagination
-        currentPage={students.meta.page.currentPage}
-        totalPages={students.meta.page.lastPage}
+        currentPage={dataFetch.meta.page.currentPage}
+        totalPages={dataFetch.meta.page.lastPage}
         onPageNext={handlePageNext}
         onPagePrev={handlePagePrev}
       />
