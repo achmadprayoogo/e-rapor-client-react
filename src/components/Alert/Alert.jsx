@@ -24,10 +24,6 @@ export default function Alert({ isShow, status, message, onClose }) {
   const { borderColor, textColor } =
     statusStyles[status] || statusStyles.default;
 
-  const handleClick = () => {
-    onClose();
-  };
-
   return (
     <div
       className={`fixed h-10 min-w-96 pe-4 ${borderColor} flex flex-row border border-s-4 items-center ${textColor} right-0 top-10 z-10 bg-[#343a40] shadow-black shadow-lg transition-transform duration-300 ${
@@ -40,7 +36,7 @@ export default function Alert({ isShow, status, message, onClose }) {
       <div>
         <p>{message}</p>
       </div>
-      <button className="flex ms-auto group" onClick={handleClick}>
+      <button className="flex ms-auto group" onClick={onClose}>
         <span className="material-symbols-outlined items-center group-hover:text-white">
           close
         </span>

@@ -27,12 +27,24 @@ export default function StudentInput() {
 
       if (result.error) {
         setError(result);
+        setLoading(false);
+        return;
       }
 
       setLoading(false);
 
-      setFormData({ ...result, age: undefined });
-      setLastData({ ...result, age: undefined });
+      setFormData({
+        ...result,
+        age: undefined,
+        academic_year: undefined,
+        grade_id: undefined,
+      });
+      setLastData({
+        ...result,
+        age: undefined,
+        academic_year: undefined,
+        grade_id: undefined,
+      });
     }
     getStudentData();
   }, [studentId]);
@@ -54,6 +66,7 @@ export default function StudentInput() {
   const handleSubmit = async (e) => {
     setAlert(Helper.closeAlert());
     e.preventDefault();
+
     const result = await patchData("/api/admin/students/update", formData);
     const newData = await Helper.formatStudentData(result.data.data);
 
@@ -61,8 +74,18 @@ export default function StudentInput() {
       case 200:
         setAlert(Helper.successAlert());
 
-        setLastData({ ...newData, age: undefined });
-        setFormData({ ...newData, age: undefined });
+        setLastData({
+          ...newData,
+          age: undefined,
+          academic_year: undefined,
+          grade_id: undefined,
+        });
+        setFormData({
+          ...newData,
+          age: undefined,
+          academic_year: undefined,
+          grade_id: undefined,
+        });
         break;
       case 409:
         setAlert(Helper.confilctAlert());
@@ -77,7 +100,7 @@ export default function StudentInput() {
   };
 
   const handleDelete = async () => {
-    window.location.href = "/biodata-delete?id=" + studentId;
+    window.location.href = "/biodata/delete?id=" + studentId;
   };
 
   const handleAlertClose = () => {
@@ -92,7 +115,7 @@ export default function StudentInput() {
     return <ErrorServer />;
   }
 
-  if (error && error.status && error.status === 404) {
+  if (error && error.status && error.status <= 400 && error.status < 500) {
     return <NotFoundError data={"Santri"} />;
   }
 
@@ -155,7 +178,7 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="date"
                 name="birthdate"
-                value={formData.birthdate}
+                value={formData.birthdate.toISOString().split("T")[0]}
                 onChange={handleChange}
               />
               <Input

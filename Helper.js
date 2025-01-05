@@ -91,17 +91,39 @@ export default class Helper {
   }
 
   static formatStudentData(data) {
+    let studentStatus = data.attributes.relationships?.student_status[0];
+    let status = studentStatus ? studentStatus.attributes.status : "-";
+    status =
+      status === "active"
+        ? "Aktif"
+        : status === "dropout"
+        ? "Boyong"
+        : status === "graduate"
+        ? "Lulus"
+        : "-";
+
     return {
       ...data.attributes,
       id: data.id,
       nis: data.attributes.nis.toString(),
-      birthdate: data.attributes.birthdate.split("T")[0].toString(),
+      fullname: this.capitalizeWords(data.attributes.fullname),
+      status,
+      city_of_birth: this.capitalizeWords(data.attributes.city_of_birth),
+      father_name: this.capitalizeWords(data.attributes.father_name),
+      mother_name: this.capitalizeWords(data.attributes.mother_name),
+      guardian_name: this.capitalizeWords(data.attributes.guardian_name || "-"),
+      address: this.capitalizeWords(data.attributes.address),
+      birthdate: new Date(data.attributes.birthdate),
       age:
         new Date().getFullYear() -
         new Date(data.attributes.birthdate).getFullYear(),
       created_at: undefined,
       updated_at: undefined,
     };
+  }
+
+  static capitalizeWords(str) {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
   static async getStudentData(studentId) {

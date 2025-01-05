@@ -6,7 +6,11 @@ import { postData } from "../../../../fetcher";
 import Alert from "../../Alert/Alert";
 import TitleInput from "../TitleInput";
 import BackButton from "../BackButton";
-import { initialAlert, initialOption } from "../../../../initialStates";
+import {
+  initialAlert,
+  initialOption,
+  statusOptions,
+} from "../../../../initialStates";
 import Helper from "../../../../helper";
 
 export default function StudentInput() {
@@ -28,14 +32,14 @@ export default function StudentInput() {
     }
 
     fetchData();
-  }, [academicYear]);
+  }, []);
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
     let result;
 
     switch (name) {
-      case "academic_year":
+      case "academic_year_id":
         result = await Helper.getGradeOptions(value);
         setGrade(result);
         break;
@@ -64,7 +68,10 @@ export default function StudentInput() {
     setAlert(Helper.closeAlert());
     e.preventDefault();
 
-    const result = await postData("/api/admin/students/input", formData);
+    const result = await postData("/api/admin/students/input", {
+      ...formData,
+      grade_id: undefined,
+    });
 
     switch (result.status) {
       case 201:
@@ -192,26 +199,21 @@ export default function StudentInput() {
                 required={true}
                 labelWidth="250px"
                 type="select"
-                name="academic_year"
+                name="academic_year_id"
                 options={academicYear}
                 onChange={handleChange}
               />
               <Input
                 label="Status"
+                required={true}
                 labelWidth="250px"
                 type="select"
-                options={[
-                  { label: "Pilih Status", value: "" },
-                  { label: "Aktif", value: "active" },
-                  { label: "Lulus", value: "graduate" },
-                  { label: "Boyong", value: "dropout" },
-                ]}
+                options={statusOptions}
                 name="status"
                 onChange={handleChange}
               />
               <Input
                 label="Tingkat"
-                required={true}
                 labelWidth="250px"
                 type="select"
                 name="grade_id"

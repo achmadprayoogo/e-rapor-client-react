@@ -67,7 +67,7 @@ export default function Input({
           type={type}
           value={value}
           placeholder={name === "homeroom_teacher" ? homeroomTeacher : ""}
-          readOnly={name === "homeroom_teacher"}
+          readOnly={name === "homeroom_teacher" ? true : readOnly}
           {...commonProps}
         />
       )}

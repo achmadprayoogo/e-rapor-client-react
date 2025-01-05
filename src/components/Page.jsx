@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import propTypes from "prop-types";
 import PageNavbar from "./PageNavbar";
 import TabelBiodata from "./Tables/TabelBiodata";
 import TabelSettings from "./Tables/TabelSettings";
@@ -6,34 +6,32 @@ import StudentInput from "./Form/Student/StudentInput";
 import StudentUpdate from "./Form/Student/StudentUpdate";
 import StudentDelete from "./Form/Student/StudentDelete";
 
-function Page() {
-  const [currentPage, setCurrentPage] = useState("biodata");
+Page.propTypes = {
+  academicYearSelected: propTypes.string,
+  location: propTypes.string,
+};
 
-  useEffect(() => {
-    const path = location.pathname.split("/").pop();
-    setCurrentPage(path || "biodata");
-  }, []);
-
+function Page({ academicYearSelected, location }) {
   const renderTable = () => {
-    switch (currentPage) {
-      case "biodata":
-        return <TabelBiodata />;
-      case "biodata-input":
+    switch (location) {
+      case "/biodata":
+        return <TabelBiodata academicYearSelected={academicYearSelected} />;
+      case "/biodata/input":
         return <StudentInput />;
-      case "biodata-update":
+      case "/biodata/update":
         return <StudentUpdate />;
-      case "biodata-delete":
+      case "/biodata/delete":
         return <StudentDelete />;
-      case "setting":
+      case "/setting":
         return <TabelSettings />;
       default:
-        return <TabelBiodata />;
+        return <TabelBiodata academicYearSelected={academicYearSelected} />;
     }
   };
 
   return (
     <div className="w-full flex flex-row overflow-x-hidden relative h-[calc(100vh-7rem)]">
-      <PageNavbar onPageChange={setCurrentPage} />
+      <PageNavbar />
       {/* Page Content */}
       <div className="w-full border-b-2 border-e-2 ms-20">{renderTable()}</div>
     </div>
