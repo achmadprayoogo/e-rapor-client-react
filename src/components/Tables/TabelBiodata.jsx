@@ -44,6 +44,19 @@ function TabelBiodata({ academicYearSelected }) {
     ...statusOptions.filter((_, index) => index !== 0),
   ];
 
+  const {
+    page: { number: pageNumber, size: pageSize },
+    sort: { by: sortBy, order: sortOrder },
+    filter: { student_status: studentStatus, academic_year_id: academicYearId },
+  } = query;
+
+  console.log("pageNumber", pageNumber);
+  console.log("pageSize", pageSize);
+  console.log("sortBy", sortBy);
+  console.log("sortOrder", sortOrder);
+  console.log("studentStatus", studentStatus);
+  console.log("academicYearId", academicYearId);
+
   useEffect(() => {
     setQuery((prev) => ({
       ...prev,
@@ -52,13 +65,15 @@ function TabelBiodata({ academicYearSelected }) {
         academic_year_id: academicYearSelected,
       },
     }));
+  }, [academicYearSelected]);
 
+  useEffect(() => {
     async function fetchData() {
       try {
         const url = `/api/admin/students?sort[by]=${query.sort.by}&sort[order]=${query.sort.order}&page[number]=${query.page.number}&page[size]=${query.page.size}&filter[academic_year_id]=${academicYearSelected}&filter[student_status]=${query.filter.student_status}`;
         const resultData = await getData(url);
 
-        console.log(resultData.data.length, resultData.data[0]);
+        console.log(resultData, resultData.data[0]);
 
         if (resultData.error) {
           setError(resultData);
@@ -73,7 +88,7 @@ function TabelBiodata({ academicYearSelected }) {
       }
     }
     fetchData();
-  }, [academicYearSelected, query.sort]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /// helper function ///
 
@@ -177,9 +192,10 @@ function TabelBiodata({ academicYearSelected }) {
   return (
     <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-col border-e-2">
       <ToolbarContainer>
+        <ToolbarItem icon="person">{`${dataFetch.meta.page.total} Santri`}</ToolbarItem>
         <Search onSearch={handleSearch} />
-        <div className="flex gap-2">
-          <ToolbarItem icon="person">{`${dataFetch.meta.page.total} Santri`}</ToolbarItem>
+        {/* render when academic year selected */}
+        {academicYearSelected ? (
           <ToolbarItem
             icon={
               query.filter.student_status === "active"
@@ -210,16 +226,16 @@ function TabelBiodata({ academicYearSelected }) {
               </select>
             </div>
           </ToolbarItem>
-          <ToolbarItem icon="add" onClick={handleInputData}>
-            Input Data
-          </ToolbarItem>
-          <ToolbarItem icon="file_upload" onClick={() => {}}>
-            Import
-          </ToolbarItem>
-          <ToolbarItem icon="file_download" onClick={() => {}}>
-            Export
-          </ToolbarItem>
-        </div>
+        ) : null}
+        <ToolbarItem icon="add" onClick={handleInputData}>
+          Input Data
+        </ToolbarItem>
+        <ToolbarItem icon="file_upload" onClick={() => {}}>
+          Import
+        </ToolbarItem>
+        <ToolbarItem icon="file_download" onClick={() => {}}>
+          Export
+        </ToolbarItem>
       </ToolbarContainer>
       <div className="flex-1 overflow-auto border rounded">
         {students.length !== 0 ? (
