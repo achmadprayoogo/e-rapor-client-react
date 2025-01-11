@@ -68,7 +68,7 @@ export default function StudentInput() {
     e.preventDefault();
 
     const result = await patchData("/api/admin/students/update", formData);
-    const newData = await Helper.formatStudentData(result.data.data);
+    const newData = Helper.formatStudentData(result.data.data);
 
     switch (result.status) {
       case 200:

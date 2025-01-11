@@ -14,8 +14,8 @@ export const initialAcademicYearOptions = async () => {
 };
 
 export const statusOptions = [
-  { label: "Pilih Status", value: "" },
-  { label: "Aktif", value: "active" },
-  { label: "Lulus", value: "graduate" },
-  { label: "Boyong", value: "dropout" },
+  { label: "Pilih Status", icon: "manage_accounts", value: "" },
+  { label: "Aktif", icon: "check_circle", value: "active" },
+  { label: "Lulus", icon: "school", value: "graduate" },
+  { label: "Boyong", icon: "do_not_disturb_on", value: "dropout" },
 ];

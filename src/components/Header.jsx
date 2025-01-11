@@ -1,15 +1,9 @@
-import PropTypes from "prop-types";
 import Logo from "./Logo";
 import AcademicYearLabel from "./AcademicYearLabel";
 import Helper from "../../helper";
 import { useState, useEffect } from "react";
 
-Header.propTypes = {
-  getAcademicYearSelected: PropTypes.func,
-  visible: PropTypes.bool,
-};
-
-function Header({ getAcademicYearSelected, visible }) {
+function Header() {
   const [academicYears, setAcademicYears] = useState([]);
 
   useEffect(() => {
@@ -22,7 +16,7 @@ function Header({ getAcademicYearSelected, visible }) {
     }
 
     fetchData();
-  }, [academicYears]);
+  }, []);
 
   return (
     <div className="w-full h-28 border flex flex-row items-center justify-start p-2">
@@ -36,11 +30,7 @@ function Header({ getAcademicYearSelected, visible }) {
           Jl. Bululawang. No. 01 <span>Kec. Bululawang</span> Kab. Malang
         </p>
       </div>
-      <AcademicYearLabel
-        visible={visible}
-        options={academicYears}
-        onChange={getAcademicYearSelected}
-      />
+      <AcademicYearLabel options={academicYears} />
     </div>
   );
 }

@@ -44,19 +44,19 @@ export async function getData(url) {
   }
 }
 
-export async function searchData(url) {
-  try {
-    const axiosJson = createAxiosJsonInstance();
-    const response = await axiosJson.get(url);
-    return response.data;
-  } catch (error) {
-    return {
-      error: error.response?.data || error.message,
-      type: getErrorType(error),
-      status: error.status || 500,
-    };
-  }
-}
+// export async function searchData(url) {
+//   try {
+//     const axiosJson = createAxiosJsonInstance();
+//     const response = await axiosJson.get(url);
+//     return response.data;
+//   } catch (error) {
+//     return {
+//       error: error.response?.data || error.message,
+//       type: getErrorType(error),
+//       status: error.status || 500,
+//     };
+//   }
+// }
 
 export async function postData(url, data) {
   try {

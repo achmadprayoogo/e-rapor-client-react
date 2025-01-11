@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 
 ToolbarItem.propTypes = {
   icon: PropTypes.string.isRequired,
-  children: PropTypes.string.isRequired,
+  children: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
   onClick: PropTypes.func,
 };
 

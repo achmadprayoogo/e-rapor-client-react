@@ -1,17 +1,17 @@
 import PropTypes from "prop-types";
 
 NavItem.propTypes = {
-  href: PropTypes.string.isRequired,
+  endPoint: PropTypes.string.isRequired,
   icon: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
 };
 
-function NavItem({ href, icon, name }) {
+function NavItem({ endPoint, icon, name }) {
   if (name === "Logout") {
     return (
       <li className="p-2 text-white mt-auto">
         <a
-          href={href}
+          onClick={() => (window.location.href = endPoint)}
           className="flex flex-row justify-center items-center mt-2 mb-2 group-hover:justify-start transition-all duration-300 "
         >
           <span className="material-symbols-outlined text-2xl hover:bg-gray-700">
@@ -27,7 +27,7 @@ function NavItem({ href, icon, name }) {
   return (
     <li className="p-2 text-white border-b">
       <a
-        href={href}
+        onClick={() => (window.location.href = endPoint)}
         className="flex flex-row justify-center items-center mt-2 mb-2 group-hover:justify-start transition-all duration-300"
       >
         <span className="material-symbols-outlined text-2xl hover:text-green-300">

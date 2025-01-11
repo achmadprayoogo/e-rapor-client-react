@@ -17,7 +17,7 @@ function PageNavbar() {
         {pages.map((page) => (
           <NavItem
             key={page.name}
-            href={page.href}
+            endPoint={page.href}
             icon={page.icon}
             name={page.name}
           />

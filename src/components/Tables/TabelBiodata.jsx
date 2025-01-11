@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
-import propTypes from "prop-types";
+import { useParams } from "react-router";
 import TablePagination from "./TablePagination";
 import ToolbarContainer from "../Toolbar/ToolbarContainer";
-import { getData, searchData } from "../../../fetcher";
+import { getData } from "../../../fetcher";
 import Loading from "../Loading/Loading";
 import ErrorServer from "../ErrorServer/ErrorServer";
 import TableHeader from "./TableHeader";
@@ -13,18 +13,15 @@ import NotFoundError from "../NotFoundError/NotFoundError";
 import Search from "../Toolbar/Search";
 import ToolbarItem from "../Toolbar/ToolbarItem";
 
-TabelBiodata.propTypes = {
-  academicYearSelected: propTypes.string, // first definition at App.jsx
-};
-
-function TabelBiodata({ academicYearSelected }) {
+function TabelBiodata() {
+  const { academic_year_id } = useParams();
   const [students, setStudents] = useState(null);
   const [dataFetch, setDataFetch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState({ status: 200 });
   const [query, setQuery] = useState({
     filter: {
-      academic_year_id: academicYearSelected,
+      academic_year_id: academic_year_id,
       student_status: "",
     },
     page: {
@@ -35,45 +32,38 @@ function TabelBiodata({ academicYearSelected }) {
       by: "fullname",
       order: "asc",
     },
+    search: "",
   });
+
   const newStatusOptions = [
-    {
-      value: "",
-      label: "Status",
-    },
-    ...statusOptions.filter((_, index) => index !== 0),
+    { ...statusOptions[0], label: "Status" },
+    ...statusOptions.slice(1),
   ];
 
   const {
     page: { number: pageNumber, size: pageSize },
     sort: { by: sortBy, order: sortOrder },
-    filter: { student_status: studentStatus, academic_year_id: academicYearId },
+    filter: { student_status: studentStatus, academic_year_id: academic_year },
   } = query;
-
-  console.log("pageNumber", pageNumber);
-  console.log("pageSize", pageSize);
-  console.log("sortBy", sortBy);
-  console.log("sortOrder", sortOrder);
-  console.log("studentStatus", studentStatus);
-  console.log("academicYearId", academicYearId);
 
   useEffect(() => {
     setQuery((prev) => ({
       ...prev,
       filter: {
         ...prev.filter,
-        academic_year_id: academicYearSelected,
+        academic_year_id: academic_year_id,
+        student_status: academic_year_id ? studentStatus : "",
       },
     }));
-  }, [academicYearSelected]);
+  }, [academic_year_id, studentStatus]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const url = `/api/admin/students?sort[by]=${query.sort.by}&sort[order]=${query.sort.order}&page[number]=${query.page.number}&page[size]=${query.page.size}&filter[academic_year_id]=${academicYearSelected}&filter[student_status]=${query.filter.student_status}`;
+        const url = `/api/admin/students?sort[by]=${sortBy}&sort[order]=${sortOrder}&page[number]=${pageNumber}&page[size]=${pageSize}&filter[academic_year_id]=${
+          academic_year || ""
+        }&filter[student_status]=${studentStatus}&search=${query.search}`;
         const resultData = await getData(url);
-
-        console.log(resultData, resultData.data[0]);
 
         if (resultData.error) {
           setError(resultData);
@@ -128,15 +118,14 @@ function TabelBiodata({ academicYearSelected }) {
   };
 
   const handleSearch = async (searchQuery) => {
-    const url = `/api/admin/students?sort[by]=${query.sort.by}&sort[order]=${query.sort.order}&page[number]=1&page[size]=20&search=${searchQuery}&filter[academic_year_id]=${academicYearSelected}`;
-    const result = await searchData(url);
-
-    setDataFetch(result);
-    setStudentFormated(result.data);
+    setQuery((prev) => ({
+      ...prev,
+      search: searchQuery,
+    }));
   };
 
   const handleInputData = () => {
-    document.location.href = `${location.origin}/biodata/input`;
+    document.location.href = `/biodata/input`;
   };
 
   const handleStatusChange = async (e) => {
@@ -179,7 +168,6 @@ function TabelBiodata({ academicYearSelected }) {
   }
 
   if (error && error.status && error.status >= 400 && error.status < 500) {
-    console.log("error", error);
     return <NotFoundError data={"Daftar Santri"} />;
   }
 
@@ -195,7 +183,7 @@ function TabelBiodata({ academicYearSelected }) {
         <ToolbarItem icon="person">{`${dataFetch.meta.page.total} Santri`}</ToolbarItem>
         <Search onSearch={handleSearch} />
         {/* render when academic year selected */}
-        {academicYearSelected ? (
+        {academic_year_id ? (
           <ToolbarItem
             icon={
               query.filter.student_status === "active"
@@ -245,22 +233,20 @@ function TabelBiodata({ academicYearSelected }) {
                 <TableHeader>No</TableHeader>
                 <TableHeader>NIS</TableHeader>
                 <TableHeader
-                  filter={query.sort.by === "fullname" && query.sort.order}
+                  filter={sortBy === "fullname"}
                   onClick={handleNameShort}
-                  order={query.sort.by === "fullname" && query.sort.order}
+                  order={sortOrder}
                 >
                   Nama
                 </TableHeader>
 
                 {/* render when academic year selected */}
-                {academicYearSelected ? (
-                  <TableHeader>Status</TableHeader>
-                ) : null}
+                {academic_year_id ? <TableHeader>Status</TableHeader> : null}
 
                 <TableHeader
-                  filter={query.sort.by === "birthdate" && query.sort.order}
+                  filter={sortBy === "birthdate"}
                   onClick={handleAgeShort}
-                  order={query.sort.by === "birthdate" && query.sort.order}
+                  order={sortOrder}
                 >
                   Umur
                 </TableHeader>
@@ -287,7 +273,7 @@ function TabelBiodata({ academicYearSelected }) {
                   <TableData>{student.fullname}</TableData>
 
                   {/* render when academic year selected */}
-                  {academicYearSelected ? (
+                  {academic_year_id ? (
                     <TableData align={"center"}>{student.status}</TableData>
                   ) : null}
 
