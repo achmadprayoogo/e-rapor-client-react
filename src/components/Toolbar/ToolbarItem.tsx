@@ -1,12 +1,10 @@
-import PropTypes from "prop-types";
+interface ToolbarItemProps {
+  icon: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
 
-ToolbarItem.propTypes = {
-  icon: PropTypes.string.isRequired,
-  children: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
-  onClick: PropTypes.func,
-};
-
-export default function ToolbarItem({ icon, children, onClick }) {
+function ToolbarItem({ icon, children, onClick }: ToolbarItemProps) {
   return (
     <button
       onClick={onClick}
@@ -18,3 +16,5 @@ export default function ToolbarItem({ icon, children, onClick }) {
     </button>
   );
 }
+
+export default ToolbarItem;

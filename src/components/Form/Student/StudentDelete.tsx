@@ -3,104 +3,62 @@ import Input from "../Input";
 import Loading from "../../Loading/Loading";
 import ErrorServer from "../../ErrorServer/ErrorServer";
 import NotFoundError from "../../NotFoundError/NotFoundError";
+import { deleteData } from "../../../../fetcher";
 import Alert from "../../Alert/Alert";
-import { initialAlert } from "../../../../initialStates";
-import { patchData } from "../../../../fetcher";
-import Helper from "../../../../helper";
-import TitleInput from "../TitleInput";
-import BackButton from "../BackButton";
 import ContentContainer from "../../ContentContainer";
+import {
+  initialAlert,
+  initialFormUpdateStudent,
+} from "../../../../initialStates";
+import Helper from "../../../../Helper";
+import { AlertConfig, Student } from "../../../../index";
 
 export default function StudentInput() {
-  const [formData, setFormData] = useState({});
-  const [isUpdate, setIsUpdate] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [alert, setAlert] = useState(initialAlert);
-  const [lastData, setLastData] = useState({});
-  const studentId = window.location.search.split("=")[1];
+  const [formData, setFormData] = useState<Student>(initialFormUpdateStudent);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [alert, setAlert] = useState<AlertConfig>(initialAlert);
+  const [statusResponse, setStatusResponse] = useState<number>(0);
+  const studentId: string = window.location.search.split("=")[1];
 
   useEffect(() => {
     async function getStudentData() {
-      setLoading(true);
       const result = await Helper.getStudentData(studentId);
 
-      if (result.error) {
-        setError(result);
-        setLoading(false);
-        return;
-      }
+      setStatusResponse(result.status);
 
       setLoading(false);
-
-      setFormData({
-        ...result,
-        age: undefined,
-        academic_year: undefined,
-        grade_id: undefined,
-      });
-      setLastData({
-        ...result,
-        age: undefined,
-        academic_year: undefined,
-        grade_id: undefined,
-      });
+      setFormData(result);
     }
     getStudentData();
   }, [studentId]);
 
-  useEffect(() => {
-    const hasChanges = JSON.stringify(lastData) !== JSON.stringify(formData);
-    setIsUpdate(hasChanges);
-  }, [formData, lastData]);
-
-  const handleChange = async (e) => {
-    const { name, value } = e.target;
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setAlert(Helper.closeAlert());
     e.preventDefault();
 
-    const result = await patchData("/api/admin/students/update", formData);
-    const newData = Helper.formatStudentData(result.data.data);
+    const result = await deleteData(
+      `/api/admin/students/delete?id=${studentId}`
+    );
+
+    setStatusResponse(result.status);
 
     switch (result.status) {
       case 200:
         setAlert(Helper.successAlert());
-
-        setLastData({
-          ...newData,
-          age: undefined,
-          academic_year: undefined,
-          grade_id: undefined,
-        });
-        setFormData({
-          ...newData,
-          age: undefined,
-          academic_year: undefined,
-          grade_id: undefined,
-        });
         break;
-      case 409:
-        setAlert(Helper.confilctAlert());
-        break;
-      case 500:
-        setError(result);
+      case 404:
+        setAlert(Helper.notFoundAlert());
         break;
       default:
         setAlert(Helper.errorAlert());
         break;
     }
+
+    setTimeout(() => setAlert(Helper.closeAlert()), 3000);
   };
 
-  const handleDelete = async () => {
-    window.location.href = "/biodata/delete?id=" + studentId;
+  const handleCancel = () => {
+    window.location.href = `${location.origin}/biodata-update?id=${studentId}`;
   };
 
   const handleAlertClose = () => {
@@ -111,11 +69,11 @@ export default function StudentInput() {
     return <Loading />;
   }
 
-  if (error && error.status && error.status === 500) {
+  if (statusResponse === 500) {
     return <ErrorServer />;
   }
 
-  if (error && error.status && error.status <= 400 && error.status < 500) {
+  if (statusResponse === 404) {
     return <NotFoundError data={"Santri"} />;
   }
 
@@ -123,27 +81,22 @@ export default function StudentInput() {
     <ContentContainer>
       <div className="relative flex flex-col space-y-4 w-full p-4">
         <div>
-          <BackButton link="/biodata" />
-          <TitleInput>UPDATE DATA SANTRI</TitleInput>
+          <a href="/biodata" className="text-white absolute top-4 left-4">
+            <span className="material-symbols-outlined">arrow_back</span>
+          </a>
+          <h3 className="text-2xl font-bold mb- text-white text-center">
+            DELETE DATA SANTRI
+          </h3>
           <Alert
             isShow={!alert.isShow}
-            status={alert.status}
+            alertStatus={alert.alertStatus}
             message={alert.message}
             onClose={handleAlertClose}
           />
-          <div className="text-white underline absolute top-4 right-4 flex flex-row space-x-4">
-            <a href={window.location.pathname + window.location.search}>
-              reset
-            </a>
-            <button onClick={handleDelete} className="text-red-500">
-              delete
-            </button>
-          </div>
         </div>
-
         <form onSubmit={handleSubmit} className="w-full h-full">
           <div className="flex flex-row w-full">
-            <div className="w-full p-4 space-y-1">
+            <div className="w-1/2 p-4 space-y-1">
               <p className="text-white mb-2 ">BIODATA</p>
               <Input
                 label="Nomor Induk Santri"
@@ -152,7 +105,7 @@ export default function StudentInput() {
                 type="number"
                 name="nis"
                 value={formData.nis}
-                onChange={handleChange}
+                readOnly={true}
               />
               <Input
                 label="Nama Lengkap"
@@ -161,7 +114,7 @@ export default function StudentInput() {
                 type="text"
                 name="fullname"
                 value={formData.fullname}
-                onChange={handleChange}
+                readOnly={true}
               />
               <Input
                 label="Tempat Lahir"
@@ -170,7 +123,7 @@ export default function StudentInput() {
                 type="text"
                 name="city_of_birth"
                 value={formData.city_of_birth}
-                onChange={handleChange}
+                readOnly={true}
               />
               <Input
                 label="Tanggal Lahir"
@@ -178,8 +131,8 @@ export default function StudentInput() {
                 labelWidth="250px"
                 type="date"
                 name="birthdate"
-                value={formData.birthdate.toISOString().split("T")[0]}
-                onChange={handleChange}
+                value={formData.birthdate}
+                readOnly={true}
               />
               <Input
                 label="Nama Ayah"
@@ -188,7 +141,7 @@ export default function StudentInput() {
                 type="text"
                 name="father_name"
                 value={formData.father_name}
-                onChange={handleChange}
+                readOnly={true}
               />
               <Input
                 label="Nama Ibu"
@@ -197,7 +150,7 @@ export default function StudentInput() {
                 type="text"
                 name="mother_name"
                 value={formData.mother_name}
-                onChange={handleChange}
+                readOnly={true}
               />
               <Input
                 label="Nama Wali"
@@ -205,7 +158,7 @@ export default function StudentInput() {
                 type="text"
                 name="guardian_name"
                 value={formData.guardian_name}
-                onChange={handleChange}
+                readOnly={true}
               />
               <Input
                 label="Alamat"
@@ -214,19 +167,34 @@ export default function StudentInput() {
                 type="text"
                 name="address"
                 value={formData.address}
-                onChange={handleChange}
+                readOnly={true}
               />
             </div>
+            <div className="flex flex-col space-y-2 items-center justify-center w-1/2 text-yellow-500">
+              <span className="material-symbols-outlined text-7xl">
+                warning
+              </span>
+              <h3 className="text-4xl">Peringatan</h3>
+              <i className="text-center text-white p-4">
+                Menghapus data stantri, juga akan menghapus data nilai, kelas,
+                dan status. Pertimbangkan sekalilagi sebelum melanjutkan. Data
+                yang telah dihapus tidak dapat dikembalikan.
+              </i>
+            </div>
           </div>
-          <div className="flex flex-row justify-center mt-4">
+          <div className="flex flex-row justify-center mt-4 space-x-60">
             <button
               type="submit"
-              disabled={!isUpdate}
-              className={`${
-                isUpdate ? "bg-yellow-500" : "bg-slate-500"
-              } w-1/2 text-white px-4 py-2 rounded-md font-semibold`}
+              className={`bg-rose-600 w-1/3 text-white px-4 py-2 rounded-md font-semibold`}
             >
-              Update
+              Tetap Hapus
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              className={`bg-lime-600 w-1/3 text-white px-4 py-2 rounded-md font-semibold`}
+            >
+              Batalkan
             </button>
           </div>
         </form>

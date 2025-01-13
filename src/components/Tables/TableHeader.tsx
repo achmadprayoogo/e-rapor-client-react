@@ -1,16 +1,13 @@
-import PropTypes from "prop-types";
+interface TableHeaderProps {
+  children: React.ReactNode;
+  filter?: boolean;
+  order?: string;
+  onClick?: () => void;
+}
 
-TableHeader.propTypes = {
-  children: PropTypes.node,
-  filter: PropTypes.bool,
-  order: PropTypes.string,
-  onClick: PropTypes.func,
-};
-
-export default function TableHeader({ children, filter, onClick, order }) {
+function TableHeader({ children, filter, onClick, order }: TableHeaderProps) {
   return (
     <th
-      id={children}
       onClick={onClick}
       className="text-white p-2 font-bold border-b text-left whitespace-nowrap"
     >
@@ -23,3 +20,5 @@ export default function TableHeader({ children, filter, onClick, order }) {
     </th>
   );
 }
+
+export default TableHeader;

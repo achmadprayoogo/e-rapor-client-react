@@ -1,28 +1,37 @@
-import PropTypes from "prop-types";
 import { useEffect } from "react";
+import { AlertStatus } from "../../../index";
 
-Alert.propTypes = {
-  isShow: PropTypes.bool.isRequired,
-  status: PropTypes.string.isRequired,
-  message: PropTypes.string.isRequired,
-  onClose: PropTypes.func.isRequired,
-};
+interface AlertProps {
+  isShow: boolean;
+  alertStatus: AlertStatus;
+  message: string;
+  onClose: () => void;
+}
 
-export default function Alert({ isShow, status, message, onClose }) {
+export default function Alert({
+  isShow,
+  alertStatus,
+  message,
+  onClose,
+}: AlertProps) {
   useEffect(() => {
     setTimeout(() => {
       onClose();
     }, 3000);
   }, [isShow]);
 
-  const statusStyles = {
+  const statusStyles: Record<
+    AlertStatus,
+    { borderColor: string; textColor: string }
+  > = {
     success: { borderColor: "border-green-500", textColor: "text-green-200" },
     error: { borderColor: "border-red-500", textColor: "text-red-200" },
     default: { borderColor: "border-gray-500", textColor: "text-gray-200" },
   };
 
-  const { borderColor, textColor } =
-    statusStyles[status] || statusStyles.default;
+  //console.log(alertStatus);
+
+  const { borderColor, textColor } = statusStyles[alertStatus];
 
   return (
     <div

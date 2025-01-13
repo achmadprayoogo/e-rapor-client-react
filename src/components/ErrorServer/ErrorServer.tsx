@@ -5,12 +5,12 @@ export default function ErrorServer() {
   useEffect(() => {
     const eyes = document.getElementsByClassName("eye");
 
-    const handleMouseMove = (event) => {
+    const handleMouseMove = (event: { pageX: number; pageY: number }) => {
       for (let i = 0; i < eyes.length; i++) {
-        const e = eyes[i];
+        const e: HTMLElement = eyes[i] as HTMLElement;
         const rect = e.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
+        const x: number = rect.left + rect.width / 2;
+        const y: number = rect.top + rect.height / 2;
         const rad = Math.atan2(event.pageX - x, event.pageY - y);
         const rot = rad * (180 / Math.PI) * -1 + 180;
 

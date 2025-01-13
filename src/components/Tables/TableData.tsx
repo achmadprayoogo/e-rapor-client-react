@@ -1,11 +1,9 @@
-import PropTypes from "prop-types";
+interface TableDataProps {
+  children: React.ReactNode;
+  align?: "left" | "center" | "right";
+}
 
-TableData.propTypes = {
-  children: PropTypes.node,
-  align: PropTypes.oneOf(["left", "center", "right"]),
-};
-
-export default function TableData({ children, align }) {
+export default function TableData({ children, align }: TableDataProps) {
   return (
     <td
       className={`border-b p-2 whitespace-nowrap text-${align} ${

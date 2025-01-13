@@ -1,10 +1,4 @@
-import propTypes from "prop-types";
-
-Search.propTypes = {
-  onSearch: propTypes.func,
-};
-
-export default function Search({ onSearch }) {
+function Search({ onSearch }: { onSearch?: (value: string) => void }) {
   return (
     <div className="flex-grow">
       <div className="relative">
@@ -21,3 +15,5 @@ export default function Search({ onSearch }) {
     </div>
   );
 }
+
+export default Search;

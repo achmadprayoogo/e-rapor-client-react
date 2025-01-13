@@ -1,10 +1,15 @@
 import Logo from "./Logo";
 import AcademicYearLabel from "./AcademicYearLabel";
-import Helper from "../../helper";
+import Helper from "../../Helper";
 import { useState, useEffect } from "react";
 
+interface AcademicYear {
+  label: string;
+  value: string;
+}
+
 function Header() {
-  const [academicYears, setAcademicYears] = useState([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
 
   useEffect(() => {
     async function fetchData() {

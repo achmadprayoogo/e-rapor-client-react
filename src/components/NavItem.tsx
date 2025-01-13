@@ -1,12 +1,10 @@
-import PropTypes from "prop-types";
+interface NavItemProps {
+  endPoint: string;
+  icon: string;
+  name: string;
+}
 
-NavItem.propTypes = {
-  endPoint: PropTypes.string.isRequired,
-  icon: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-};
-
-function NavItem({ endPoint, icon, name }) {
+function NavItem({ endPoint, icon, name }: NavItemProps) {
   if (name === "Logout") {
     return (
       <li className="p-2 text-white mt-auto">

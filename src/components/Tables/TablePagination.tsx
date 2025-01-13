@@ -1,13 +1,16 @@
-import PropTypes from "prop-types";
+interface TablePaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageNext: () => void;
+  onPagePrev: () => void;
+}
 
-TablePagination.propTypes = {
-  currentPage: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  onPageNext: PropTypes.func.isRequired,
-  onPagePrev: PropTypes.func.isRequired,
-};
-
-function TablePagination({ currentPage, totalPages, onPageNext, onPagePrev }) {
+function TablePagination({
+  currentPage,
+  totalPages,
+  onPageNext,
+  onPagePrev,
+}: TablePaginationProps) {
   return (
     <div className="flex items-center justify-between mt-4 border rounded-xl">
       <button

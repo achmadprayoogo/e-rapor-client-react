@@ -1,47 +1,48 @@
 import { getData } from "./fetcher";
+import { AlertConfig, AlertStatus } from "./index";
 
 export default class Helper {
-  static closeAlert() {
+  static closeAlert(): AlertConfig {
     return {
       isShow: false,
-      status: "",
+      alertStatus: "default" as AlertStatus,
       message: "",
     };
   }
-  static successAlert() {
+  static successAlert(): AlertConfig {
     return {
       isShow: true,
-      status: "success",
+      alertStatus: "success" as AlertStatus,
       message: "Berhasil menyimpan data",
     };
   }
 
-  static confilctAlert() {
+  static confilctAlert(): AlertConfig {
     return {
       isShow: true,
-      status: "error",
+      alertStatus: "error" as AlertStatus,
       message: "Data utama telah dimasukkan sebelumnya",
     };
   }
 
-  static notFoundAlert() {
+  static notFoundAlert(): AlertConfig {
     return {
       isShow: true,
-      status: "error",
+      alertStatus: "error" as AlertStatus,
       message: "Data tidak ditemukan atau sudah dihapus",
     };
   }
 
-  static errorAlert() {
+  static errorAlert(): AlertConfig {
     return {
       isShow: true,
-      status: "error",
+      alertStatus: "error" as AlertStatus,
       message: "Gagal menyimpan data",
     };
   }
 
-  static setOptions(data, label) {
-    return data.map((item) => ({
+  static setOptions(data: [], label: string) {
+    return data.map((item: any) => ({
       label: item.attributes[label],
       value: item.id,
     }));
@@ -58,7 +59,7 @@ export default class Helper {
     return [{ label: "Pilih Tahun Ajaran", value: "" }, ...academicYears];
   }
 
-  static async getGradeOptions(academicyearId) {
+  static async getGradeOptions(academicyearId: string) {
     const result = await getData("/api/admin/gradeclass/" + academicyearId);
 
     if (!result) {
@@ -69,7 +70,7 @@ export default class Helper {
     return [{ label: "Pilih Tingkat", value: "" }, ...grades];
   }
 
-  static async getClassNameOptions(gradeId) {
+  static async getClassNameOptions(gradeId: string) {
     const result = await getData("/api/admin/classname/" + gradeId);
 
     if (!result) {
@@ -80,7 +81,7 @@ export default class Helper {
     return [{ label: "Pilih Kelas", value: "" }, ...classes];
   }
 
-  static async getHomeroomTeacher(classId) {
+  static async getHomeroomTeacher(classId: string) {
     const result = await getData("/api/admin/classname/find/" + classId);
 
     if (!result) {
@@ -90,7 +91,7 @@ export default class Helper {
     return `Ust. ${result.data.attributes.homeroom_teacher}`;
   }
 
-  static formatStudentData(data) {
+  static formatStudentData(data: any) {
     let studentStatus = data.attributes.relationships?.student_status[0];
     let status = studentStatus ? studentStatus.attributes.status : "-";
     status =
@@ -122,11 +123,11 @@ export default class Helper {
     };
   }
 
-  static capitalizeWords(str) {
+  static capitalizeWords(str: string) {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
-  static async getStudentData(studentId) {
+  static async getStudentData(studentId: string) {
     const result = await getData(`/api/admin/student/${studentId}`);
 
     if (result.error) {

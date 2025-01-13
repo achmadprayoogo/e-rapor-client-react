@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { AlertConfig, FormInputStudent, Options } from "../../../../index";
 import Input from "../Input";
 import Loading from "../../Loading/Loading";
 import ErrorServer from "../../ErrorServer/ErrorServer";
@@ -10,22 +11,27 @@ import {
   initialAlert,
   initialOption,
   statusOptions,
+  initialFormInputStudent,
 } from "../../../../initialStates";
-import Helper from "../../../../helper";
+import Helper from "../../../../Helper";
+import { set } from "date-fns";
 
 export default function StudentInput() {
-  const [formData, setFormData] = useState({});
-  const [academicYear, setAcademicYear] = useState(initialOption);
-  const [grade, setGrade] = useState(initialOption);
-  const [classRoom, setClassRoom] = useState(initialOption);
-  const [homeroomTeacher, setHomeroomTeacher] = useState("Belum ada data");
-  const [alert, setAlert] = useState(initialAlert);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState<FormInputStudent>(
+    initialFormInputStudent
+  );
+  const [academicYear, setAcademicYear] = useState<Options[]>(initialOption);
+  const [grade, setGrade] = useState<Options[]>(initialOption);
+  const [classRoom, setClassRoom] = useState<Options[]>(initialOption);
+  const [homeroomTeacher, setHomeroomTeacher] =
+    useState<string>("Belum ada data");
+  const [alert, setAlert] = useState<AlertConfig>(initialAlert);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [statusResponse, setStatusResponse] = useState<number>(0);
 
   useEffect(() => {
     async function fetchData() {
-      const result = await Helper.getAcademicYearOptions();
+      const result: Options[] = await Helper.getAcademicYearOptions();
       setAcademicYear(result);
 
       setLoading(false);
@@ -34,7 +40,11 @@ export default function StudentInput() {
     fetchData();
   }, []);
 
-  const handleChange = async (e) => {
+  const handleChange = async (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     let result;
 
@@ -64,7 +74,7 @@ export default function StudentInput() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setAlert(Helper.closeAlert());
     e.preventDefault();
 
@@ -72,6 +82,8 @@ export default function StudentInput() {
       ...formData,
       grade_id: undefined,
     });
+
+    console.log(formData);
 
     switch (result.status) {
       case 201:
@@ -83,7 +95,7 @@ export default function StudentInput() {
         break;
 
       case 500:
-        setError(result);
+        setStatusResponse(500);
         break;
 
       default:
@@ -100,7 +112,7 @@ export default function StudentInput() {
     return <Loading />;
   }
 
-  if (error && error.status && error.status === 500) {
+  if (statusResponse === 500) {
     return <ErrorServer />;
   }
 
@@ -112,7 +124,7 @@ export default function StudentInput() {
           <TitleInput>INPUT DATA SANTRI</TitleInput>
           <Alert
             isShow={!alert.isShow}
-            status={alert.status}
+            alertStatus={alert.alertStatus}
             message={alert.message}
             onClose={handleAlertClose}
           />

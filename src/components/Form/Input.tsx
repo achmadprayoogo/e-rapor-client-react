@@ -1,23 +1,24 @@
-import PropTypes from "prop-types";
 import "./Input.css";
 
-Input.propTypes = {
-  label: PropTypes.string.isRequired,
-  labelWidth: PropTypes.string,
-  type: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  required: PropTypes.bool,
-  homeroomTeacher: PropTypes.string,
-  value: PropTypes.string,
-  readOnly: PropTypes.bool,
-  onChange: PropTypes.func,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string.isRequired,
-      value: PropTypes.string.isRequired,
-    })
-  ),
-};
+interface inputProps {
+  label: string;
+  labelWidth: string;
+  type: string;
+  name: string;
+  required?: boolean;
+  homeroomTeacher?: string;
+  value?: string | number | Date;
+  readOnly?: boolean;
+  onChange?: (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>
+  ) => void;
+  options?: {
+    label: string;
+    value: string;
+  }[];
+}
 
 export default function Input({
   label,
@@ -30,12 +31,11 @@ export default function Input({
   readOnly,
   onChange,
   homeroomTeacher,
-}) {
+}: inputProps) {
   const commonProps = {
     name,
     onChange,
     required,
-    readOnly,
     className:
       "font-mono block w-full border-b bg-transparent text-lg text-white focus:outline-none pb-1",
   };
@@ -50,7 +50,7 @@ export default function Input({
       </label>
       {type === "select" ? (
         <select {...commonProps}>
-          {options.map((option, index) => (
+          {options?.map((option, index) => (
             <option
               key={option.value}
               value={option.value}
@@ -65,7 +65,9 @@ export default function Input({
       ) : (
         <input
           type={type}
-          value={value}
+          value={
+            value instanceof Date ? value.toISOString().split("T")[0] : value
+          }
           placeholder={name === "homeroom_teacher" ? homeroomTeacher : ""}
           readOnly={name === "homeroom_teacher" ? true : readOnly}
           {...commonProps}

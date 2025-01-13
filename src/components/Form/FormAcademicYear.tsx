@@ -1,10 +1,4 @@
-import PropTypes from "prop-types";
-
-FormAcademicYear.propTypes = {
-  isClicked: PropTypes.bool,
-};
-
-function FormAcademicYear({ isClicked }) {
+function FormAcademicYear({ isClicked }: { isClicked: boolean }) {
   return (
     <div
       className={`fixed top-1/4 left-1/4 right-1/4 min-h-96 z-20 ${

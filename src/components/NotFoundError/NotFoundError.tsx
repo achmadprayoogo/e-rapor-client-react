@@ -1,11 +1,6 @@
 import "./NotFoundError.css";
-import PropTypes from "prop-types";
 
-NotFoundError.propTypes = {
-  data: PropTypes.string,
-};
-
-export default function NotFoundError({ data }) {
+function NotFoundError({ data }: { data: string }) {
   return (
     <div className="flex flex-col justify-center items-center h-full">
       <h1 className="text-4xl text-white">Error Not Found</h1>
@@ -14,3 +9,5 @@ export default function NotFoundError({ data }) {
     </div>
   );
 }
+
+export default NotFoundError;

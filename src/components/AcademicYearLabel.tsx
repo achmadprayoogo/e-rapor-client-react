@@ -1,17 +1,10 @@
-import PropTypes from "prop-types";
 import { useNavigate } from "react-router";
 
-AcademicYearLabel.propTypes = {
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string.isRequired,
-      value: PropTypes.string.isRequired,
-    })
-  ),
-  onFocus: PropTypes.func,
-};
+interface AcademicYearLabelProps {
+  options: { label: string; value: string }[];
+}
 
-export default function AcademicYearLabel({ options, onFocus }) {
+export default function AcademicYearLabel({ options }: AcademicYearLabelProps) {
   const navigate = useNavigate();
   const visible = window.location.pathname.split("/").length <= 4;
   return (
@@ -28,7 +21,6 @@ export default function AcademicYearLabel({ options, onFocus }) {
         onChange={(e) => {
           navigate(`/biodata/${e.target.value}`);
         }}
-        onFocus={onFocus}
       >
         {options.map((option) => (
           <option
