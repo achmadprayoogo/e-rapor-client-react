@@ -35,8 +35,8 @@ export default function Alert({
 
   return (
     <div
-      className={`fixed h-10 min-w-96 pe-4 ${borderColor} flex flex-row border border-s-4 items-center ${textColor} right-0 top-10 z-10 bg-[#343a40] shadow-black shadow-lg transition-transform duration-300 ${
-        isShow ? "translate-x-full" : "translate-x-0"
+      className={`fixed h-10 min-w-96 pe-4 ${borderColor} flex flex-row border border-s-8 items-center ${textColor} right- top-10 z-10 bg-[#343a40] shadow-black shadow-lg transition-transform duration-300 ${
+        isShow ? "right-[-5px] translate-x-full" : "right-5 translate-x-0"
       }`}
     >
       <span className="material-symbols-outlined p-2">

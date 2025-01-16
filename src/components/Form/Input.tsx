@@ -1,4 +1,7 @@
+import { initialOptions } from "initialStates";
 import "./Input.css";
+import OptionsInput from "./OptionsInput";
+import { Options } from "index";
 
 interface inputProps {
   label: string;
@@ -14,10 +17,7 @@ interface inputProps {
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLSelectElement>
   ) => void;
-  options?: {
-    label: string;
-    value: string;
-  }[];
+  options?: Options[];
 }
 
 export default function Input({
@@ -50,17 +50,7 @@ export default function Input({
       </label>
       {type === "select" ? (
         <select {...commonProps}>
-          {options?.map((option, index) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={index === 0}
-              selected={index === 0}
-              className="text-white bg-[#343a40]"
-            >
-              {option.label}
-            </option>
-          ))}
+          <OptionsInput options={options} />
         </select>
       ) : (
         <input

@@ -12,6 +12,7 @@ import {
 } from "../../../../initialStates";
 import Helper from "../../../../Helper";
 import { AlertConfig, Student } from "../../../../index";
+import { useNavigate } from "react-router";
 
 export default function StudentInput() {
   const [formData, setFormData] = useState<Student>(initialFormUpdateStudent);
@@ -19,6 +20,7 @@ export default function StudentInput() {
   const [alert, setAlert] = useState<AlertConfig>(initialAlert);
   const [statusResponse, setStatusResponse] = useState<number>(0);
   const studentId: string = window.location.search.split("=")[1];
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function getStudentData() {
@@ -58,7 +60,7 @@ export default function StudentInput() {
   };
 
   const handleCancel = () => {
-    window.location.href = `${location.origin}/biodata-update?id=${studentId}`;
+    navigate(-1);
   };
 
   const handleAlertClose = () => {
@@ -81,9 +83,12 @@ export default function StudentInput() {
     <ContentContainer>
       <div className="relative flex flex-col space-y-4 w-full p-4">
         <div>
-          <a href="/biodata" className="text-white absolute top-4 left-4">
+          <button
+            onClick={handleCancel}
+            className="text-white absolute top-4 left-4"
+          >
             <span className="material-symbols-outlined">arrow_back</span>
-          </a>
+          </button>
           <h3 className="text-2xl font-bold mb- text-white text-center">
             DELETE DATA SANTRI
           </h3>

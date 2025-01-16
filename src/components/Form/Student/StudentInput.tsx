@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AlertConfig, FormInputStudent, Options } from "../../../../index";
+import ContentContainer from "../../ContentContainer";
 import Input from "../Input";
 import Loading from "../../Loading/Loading";
 import ErrorServer from "../../ErrorServer/ErrorServer";
@@ -9,20 +10,19 @@ import TitleInput from "../TitleInput";
 import BackButton from "../BackButton";
 import {
   initialAlert,
-  initialOption,
+  initialOptions,
   statusOptions,
   initialFormInputStudent,
 } from "../../../../initialStates";
 import Helper from "../../../../Helper";
-import { set } from "date-fns";
 
 export default function StudentInput() {
   const [formData, setFormData] = useState<FormInputStudent>(
     initialFormInputStudent
   );
-  const [academicYear, setAcademicYear] = useState<Options[]>(initialOption);
-  const [grade, setGrade] = useState<Options[]>(initialOption);
-  const [classRoom, setClassRoom] = useState<Options[]>(initialOption);
+  const [academicYear, setAcademicYear] = useState<Options[]>(initialOptions);
+  const [grade, setGrade] = useState<Options[]>(initialOptions);
+  const [classRoom, setClassRoom] = useState<Options[]>(initialOptions);
   const [homeroomTeacher, setHomeroomTeacher] =
     useState<string>("Belum ada data");
   const [alert, setAlert] = useState<AlertConfig>(initialAlert);
@@ -117,10 +117,10 @@ export default function StudentInput() {
   }
 
   return (
-    <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-row border-e-2">
+    <ContentContainer>
       <div className="relative flex flex-col space-y-4 w-full p-4">
         <div>
-          <BackButton link="/biodata" />
+          <BackButton />
           <TitleInput>INPUT DATA SANTRI</TitleInput>
           <Alert
             isShow={!alert.isShow}
@@ -261,6 +261,6 @@ export default function StudentInput() {
           </div>
         </form>
       </div>
-    </div>
+    </ContentContainer>
   );
 }

@@ -1,5 +1,6 @@
 import { getData } from "./fetcher";
 import { AlertConfig, AlertStatus } from "./index";
+import { StudentStatus } from "./index";
 
 export default class Helper {
   static closeAlert(): AlertConfig {
@@ -92,8 +93,8 @@ export default class Helper {
   }
 
   static formatStudentData(data: any) {
-    let studentStatus = data.attributes.relationships?.student_status[0];
-    let status = studentStatus ? studentStatus.attributes.status : "-";
+    let studentStatus = data.attributes.relationships?.class_member[0];
+    let status = studentStatus ? studentStatus.attributes.student_status : "-";
     status =
       status === "active"
         ? "Aktif"
@@ -123,6 +124,31 @@ export default class Helper {
     };
   }
 
+  static formatHTMLDate(date: string) {
+    return date.split("T")[0];
+  }
+
+  static formatClassMember(data: any) {
+    const relationships = data.attributes.relationships;
+    const classNameRelationships = relationships.class_name.relationships;
+    return {
+      id: data.id,
+      nis: relationships.student.nis,
+      fullname: relationships.student.fullname,
+      city_of_birth: relationships.student.city_of_birth,
+      birthdate: this.formatHTMLDate(relationships.student.birthdate),
+      father_name: relationships.student.father_name,
+      mother_name: relationships.student.mother_name,
+      guardian_name: relationships.student.guardian_name,
+      address: relationships.student.address,
+      academic_year: classNameRelationships.grade_class.relationships.academic_year.academic_year, // prettier-ignore
+      student_status: data.attributes.student_status as StudentStatus,
+      grade_class: classNameRelationships.grade_class.grade_class,
+      class_name: relationships.class_name.class_name,
+      homeroom_teacher: relationships.class_name.homeroom_teacher,
+    };
+  }
+
   static capitalizeWords(str: string) {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
   }
@@ -139,5 +165,19 @@ export default class Helper {
     }
 
     return this.formatStudentData(result.data.data);
+  }
+
+  static async getClassMemberData(studentId: string) {
+    const result = await getData(`/api/admin/classmember/${studentId}`);
+
+    if (result.error) {
+      return result;
+    }
+
+    if (!result) {
+      throw new Error("Failed to fetch class member data");
+    }
+    console.log(result);
+    return this.formatClassMember(result.data);
   }
 }

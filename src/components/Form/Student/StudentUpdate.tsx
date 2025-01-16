@@ -12,6 +12,7 @@ import TitleInput from "../TitleInput";
 import BackButton from "../BackButton";
 import ContentContainer from "../../ContentContainer";
 import { AlertConfig, Student } from "../../../../index";
+import { useNavigate } from "react-router";
 
 export default function StudentInput() {
   const [formData, setFormData] = useState<Student>(initialFormUpdateStudent);
@@ -21,6 +22,7 @@ export default function StudentInput() {
   const [alert, setAlert] = useState<AlertConfig>(initialAlert);
   const [lastData, setLastData] = useState<Student>(initialFormUpdateStudent);
   const studentId: string = window.location.search.split("=")[1];
+  const navigate = useNavigate();
 
   function formatResult(result: Student) {
     return {
@@ -92,11 +94,15 @@ export default function StudentInput() {
   };
 
   const handleDelete = async () => {
-    window.location.href = "/biodata/delete?id=" + studentId;
+    navigate("/biodata/delete?id=" + studentId);
   };
 
   const handleAlertClose = () => {
     setAlert(Helper.closeAlert());
+  };
+
+  const handleReset = () => {
+    setFormData(lastData);
   };
 
   if (loading) {
@@ -115,7 +121,7 @@ export default function StudentInput() {
     <ContentContainer>
       <div className="relative flex flex-col space-y-4 w-full p-4">
         <div>
-          <BackButton link="/biodata" />
+          <BackButton />
           <TitleInput>UPDATE DATA SANTRI</TitleInput>
           <Alert
             isShow={!alert.isShow}
@@ -124,9 +130,7 @@ export default function StudentInput() {
             onClose={handleAlertClose}
           />
           <div className="text-white underline absolute top-4 right-4 flex flex-row space-x-4">
-            <a href={window.location.pathname + window.location.search}>
-              reset
-            </a>
+            <button onClick={handleReset}>reset</button>
             <button onClick={handleDelete} className="text-red-500">
               delete
             </button>

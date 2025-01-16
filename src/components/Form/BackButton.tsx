@@ -1,8 +1,14 @@
-function BackButton({ link }: { link: string }) {
+import { useNavigate } from "react-router";
+
+function BackButton() {
+  const navigate = useNavigate();
   return (
-    <a href={link} className="text-white absolute top-4 left-4">
+    <button
+      onClick={() => navigate(-1)}
+      className="text-white absolute top-4 left-4"
+    >
       <span className="material-symbols-outlined">arrow_back</span>
-    </a>
+    </button>
   );
 }
 

@@ -1,3 +1,22 @@
+export interface DataFetch {
+  data: [];
+  meta: {
+    page: {
+      currentPage: number;
+      lastPage: number;
+      from: number;
+      to: number;
+      total: number;
+    };
+  };
+  links: {
+    first: string;
+    last: string;
+    next: string;
+    prev: string;
+  };
+}
+
 export interface Student {
   id: string;
   nis: string;
@@ -8,6 +27,23 @@ export interface Student {
   mother_name: string;
   guardian_name: string;
   address: string;
+}
+
+export interface ClassMember {
+  id: string;
+  nis: string;
+  fullname: string;
+  city_of_birth: string;
+  birthdate: string;
+  father_name: string;
+  mother_name: string;
+  guardian_name: string;
+  address: string;
+  academic_year: string;
+  student_status: StudentStatus;
+  grade_class: string;
+  class_name: string;
+  homeroom_teacher: string;
 }
 
 export enum StudentStatus {

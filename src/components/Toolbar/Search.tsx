@@ -4,7 +4,7 @@ function Search({ onSearch }: { onSearch?: (value: string) => void }) {
       <div className="relative">
         <input
           type="text"
-          placeholder="Cari...   nis/nama/tempal lahir/ayah/ibu/wali/alamat"
+          placeholder="Cari..."
           onChange={(e) => onSearch?.(e.target.value)}
           className="w-full p-2 bg-transparent border rounded-lg text-white placeholder:italic focus:outline-none focus:border-blue-500"
         />

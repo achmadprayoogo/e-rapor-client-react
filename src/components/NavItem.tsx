@@ -2,14 +2,18 @@ interface NavItemProps {
   endPoint: string;
   icon: string;
   name: string;
+  isActive: boolean;
 }
 
-function NavItem({ endPoint, icon, name }: NavItemProps) {
+function NavItem({ endPoint, icon, name, isActive }: NavItemProps) {
+  const handleClick = () => {
+    window.location.href = endPoint;
+  };
   if (name === "Logout") {
     return (
       <li className="p-2 text-white mt-auto">
         <a
-          onClick={() => (window.location.href = endPoint)}
+          onClick={handleClick}
           className="flex flex-row justify-center items-center mt-2 mb-2 group-hover:justify-start transition-all duration-300 "
         >
           <span className="material-symbols-outlined text-2xl hover:bg-gray-700">
@@ -23,9 +27,9 @@ function NavItem({ endPoint, icon, name }: NavItemProps) {
     );
   }
   return (
-    <li className="p-2 text-white border-b">
+    <li className={`p-2 text-white ${isActive && "bg-green-700 "} rounded-md`}>
       <a
-        onClick={() => (window.location.href = endPoint)}
+        onClick={handleClick}
         className="flex flex-row justify-center items-center mt-2 mb-2 group-hover:justify-start transition-all duration-300"
       >
         <span className="material-symbols-outlined text-2xl hover:text-green-300">

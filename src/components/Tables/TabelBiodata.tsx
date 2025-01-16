@@ -1,6 +1,8 @@
-import { useState, useCallback, useEffect, ReactElement } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "react-router";
+import TableContainer from "./TableContainer";
 import TablePagination from "./TablePagination";
+import ContentContainer from "../ContentContainer";
 import ToolbarContainer from "../Toolbar/ToolbarContainer";
 import { getData } from "../../../fetcher";
 import Loading from "../Loading/Loading";
@@ -12,6 +14,8 @@ import { statusOptions } from "../../../initialStates";
 import NotFoundError from "../NotFoundError/NotFoundError";
 import Search from "../Toolbar/Search";
 import ToolbarItem from "../Toolbar/ToolbarItem";
+import { DataFetch } from "../../../index";
+import { useNavigate } from "react-router";
 
 interface Student {
   id: string;
@@ -25,25 +29,6 @@ interface Student {
   mother_name: string;
   guardian_name: string;
   address: string;
-}
-
-interface dataFetch {
-  data: [];
-  meta: {
-    page: {
-      currentPage: number;
-      lastPage: number;
-      from: number;
-      to: number;
-      total: number;
-    };
-  };
-  links: {
-    first: string;
-    last: string;
-    next: string;
-    prev: string;
-  };
 }
 
 interface error {
@@ -69,7 +54,7 @@ interface Query {
 function TabelBiodata() {
   const { academic_year_id } = useParams();
   const [students, setStudents] = useState<Student[]>([]);
-  const [dataFetch, setDataFetch] = useState<dataFetch>();
+  const [dataFetch, setDataFetch] = useState<DataFetch>();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<error>({ status: 200 });
   const [query, setQuery] = useState<Query>({
@@ -87,7 +72,7 @@ function TabelBiodata() {
     },
     search: "",
   });
-
+  const navigate = useNavigate();
   const newStatusOptions = [
     { ...statusOptions[0], label: "Status" },
     ...statusOptions.slice(1),
@@ -117,6 +102,7 @@ function TabelBiodata() {
           academic_year || ""
         }&filter[student_status]=${studentStatus}&search=${query.search}`;
         const resultData = await getData(url);
+        console.log(resultData.data);
 
         if (resultData.error) {
           setError(resultData);
@@ -178,7 +164,7 @@ function TabelBiodata() {
   };
 
   const handleInputData = () => {
-    document.location.href = `/biodata/input`;
+    navigate(`/biodata/input`);
   };
 
   const handleStatusChange = async (
@@ -233,12 +219,12 @@ function TabelBiodata() {
   console.log("students", students.length);
 
   return (
-    <div className="p-4 h-full w-[calc(100vw-5rem)] flex flex-col border-e-2">
+    <ContentContainer direction="column">
       <ToolbarContainer>
         <ToolbarItem icon="person">{`${dataFetch.meta.page.total} Santri`}</ToolbarItem>
         <Search onSearch={handleSearch} />
         {/* render when academic year selected */}
-        {academic_year_id ? (
+        {academic_year_id && (
           <ToolbarItem
             icon={
               query.filter.student_status === "active"
@@ -269,7 +255,7 @@ function TabelBiodata() {
               </select>
             </div>
           </ToolbarItem>
-        ) : null}
+        )}
         <ToolbarItem icon="add" onClick={handleInputData}>
           Input Data
         </ToolbarItem>
@@ -280,7 +266,7 @@ function TabelBiodata() {
           Export
         </ToolbarItem>
       </ToolbarContainer>
-      <div className="flex-1 overflow-auto border rounded">
+      <TableContainer>
         {students.length !== 0 ? (
           <table className="w-full border-separate border-spacing-0">
             <thead className="sticky top-0 bg-[#343a40]">
@@ -352,14 +338,14 @@ function TabelBiodata() {
         ) : (
           <NotFoundError data={"Daftar Santri"} />
         )}
-      </div>
+      </TableContainer>
       <TablePagination
         currentPage={dataFetch.meta.page.currentPage}
         totalPages={dataFetch.meta.page.lastPage}
         onPageNext={handlePageNext}
         onPagePrev={handlePagePrev}
       />
-    </div>
+    </ContentContainer>
   );
 }
 

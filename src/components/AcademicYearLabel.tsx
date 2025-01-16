@@ -6,7 +6,8 @@ interface AcademicYearLabelProps {
 
 export default function AcademicYearLabel({ options }: AcademicYearLabelProps) {
   const navigate = useNavigate();
-  const visible = window.location.pathname.split("/").length <= 4;
+  const visible: boolean = window.location.pathname.split("/").length <= 4;
+  const pathNames: string[] = location.pathname.split("/");
   return (
     <div
       className={`${
@@ -19,7 +20,18 @@ export default function AcademicYearLabel({ options }: AcademicYearLabelProps) {
         id=""
         className="bg-transparent text-white p-2 focus:outline-none "
         onChange={(e) => {
-          navigate(`/biodata/${e.target.value}`);
+          let link: string;
+          link = location.pathname + "/" + e.target.value;
+
+          if (pathNames.length === 3) {
+            link = location.pathname.slice(0, -36) + e.target.value;
+          }
+
+          if (e.target.value === "") {
+            link = location.pathname.slice(0, -37);
+          }
+
+          navigate(link);
         }}
       >
         {options.map((option) => (

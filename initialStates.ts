@@ -1,5 +1,24 @@
 import Helper from "./Helper";
-import { AlertStatus } from "./index";
+import { AlertStatus, DataFetch } from "./index";
+
+export const initialDataFetch: DataFetch = {
+  data: [],
+  meta: {
+    page: {
+      currentPage: 0,
+      lastPage: 0,
+      from: 0,
+      to: 0,
+      total: 0,
+    },
+  },
+  links: {
+    first: "",
+    last: "",
+    next: "",
+    prev: "",
+  },
+};
 
 export const initialAlert = {
   isShow: false,
@@ -45,7 +64,7 @@ export const initialFormUpdateStudent = {
   address: "",
 };
 
-export const initialOption = [{ label: "Belum ada data", value: "" }];
+export const initialOptions = [{ label: "Belum ada data", value: "" }];
 
 export const initialAcademicYearOptions = async () => {
   const result = (await Helper.getAcademicYearOptions()).slice(1);
