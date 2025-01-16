@@ -1,17 +1,20 @@
-import PropTypes from "prop-types";
+interface TablePaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageNext: () => void;
+  onPagePrev: () => void;
+}
 
-TablePagination.propTypes = {
-  currentPage: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  onPageNext: PropTypes.func.isRequired,
-  onPagePrev: PropTypes.func.isRequired,
-};
-
-function TablePagination({ currentPage, totalPages, onPageNext, onPagePrev }) {
+function TablePagination({
+  currentPage,
+  totalPages,
+  onPageNext,
+  onPagePrev,
+}: TablePaginationProps) {
   return (
     <div className="flex items-center justify-between mt-4 border rounded-xl">
       <button
-        onClick={() => onPagePrev()}
+        onClick={onPagePrev}
         disabled={currentPage === 1}
         className="flex items-center px-4 py-2 text-white disabled:opacity-50"
       >
@@ -20,11 +23,13 @@ function TablePagination({ currentPage, totalPages, onPageNext, onPagePrev }) {
       </button>
 
       <div className="text-white">
-        {currentPage} dari {totalPages}
+        <i>
+          Hal. {currentPage} / {totalPages}
+        </i>
       </div>
 
       <button
-        onClick={() => onPageNext()}
+        onClick={onPageNext}
         disabled={currentPage === totalPages}
         className="flex items-center px-4 py-2 text-white disabled:opacity-50"
       >

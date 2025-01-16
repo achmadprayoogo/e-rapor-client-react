@@ -1,17 +1,19 @@
-import PropTypes from "prop-types";
+interface NavItemProps {
+  endPoint: string;
+  icon: string;
+  name: string;
+  isActive: boolean;
+}
 
-NavItem.propTypes = {
-  href: PropTypes.string.isRequired,
-  icon: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-};
-
-function NavItem({ href, icon, name }) {
+function NavItem({ endPoint, icon, name, isActive }: NavItemProps) {
+  const handleClick = () => {
+    window.location.href = endPoint;
+  };
   if (name === "Logout") {
     return (
       <li className="p-2 text-white mt-auto">
         <a
-          href={href}
+          onClick={handleClick}
           className="flex flex-row justify-center items-center mt-2 mb-2 group-hover:justify-start transition-all duration-300 "
         >
           <span className="material-symbols-outlined text-2xl hover:bg-gray-700">
@@ -25,9 +27,9 @@ function NavItem({ href, icon, name }) {
     );
   }
   return (
-    <li className="p-2 text-white border-b">
+    <li className={`p-2 text-white ${isActive && "bg-green-700 "} rounded-md`}>
       <a
-        href={href}
+        onClick={handleClick}
         className="flex flex-row justify-center items-center mt-2 mb-2 group-hover:justify-start transition-all duration-300"
       >
         <span className="material-symbols-outlined text-2xl hover:text-green-300">

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import TablePagination from "../TablePagination";
-import Toolbar from "../Toolbar/Toolbar";
+import TablePagination from "./TablePagination";
+import ToolbarContainer from "../Toolbar/ToolbarContainer";
 import FormAcademicYear from "../Form/FormAcademicYear";
 
 const ROW_HEADERS = ["No", "Tahun Ajaran", "Tanggal Awal", "Tanggal Akhir"];
@@ -25,7 +25,7 @@ function TabelSettings() {
 
   return (
     <div className="p-4 h-full flex flex-col">
-      <Toolbar
+      <ToolbarContainer
         onSearch={() => console.log("Search data")}
         toolbarItems={[
           {

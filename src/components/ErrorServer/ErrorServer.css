@@ -1,0 +1,48 @@
+.box {
+  color: white;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.error-num {
+  font-size: 8em;
+}
+
+.eye {
+  background: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  height: 100px;
+  position: relative;
+  width: 100px;
+}
+
+.eye::after {
+  background: #000;
+  border-radius: 50%;
+  bottom: 56.1px;
+  content: "";
+  height: 33px;
+  position: absolute;
+  right: 33px;
+  width: 33px;
+}
+
+.sub-text {
+  margin-bottom: 5em;
+  font-size: 20px;
+  font-weight: normal;
+}
+
+.link-back {
+  color: white;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.link-back:hover {
+  color: lightgray;
+}
