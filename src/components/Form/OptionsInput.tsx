@@ -6,8 +6,8 @@ function OptionsInput({ options }: { options?: Options[] }) {
         <option
           key={option.value}
           value={option.value}
-          disabled={index === 0}
-          selected={index === 0}
+          disabled={option.disabled}
+          selected={option.selected}
           className="text-white bg-[#343a40]"
         >
           {option.label}
